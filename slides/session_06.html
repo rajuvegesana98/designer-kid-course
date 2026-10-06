@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 06 — Visual Design Basics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F0E17;--surface:#1E1B32;--surf2:#252240;
+  --violet:#5B21B6;--vlt:#7C3AED;--vlt-dim:rgba(124,58,237,0.18);
+  --coral:#F4574A;--cor-dim:rgba(244,87,74,0.14);
+  --gold:#F5C518;--gld-dim:rgba(245,197,24,0.13);
+  --green:#34D399;--grn-dim:rgba(52,211,153,0.10);
+  --white:#F0EDF8;--dim:rgba(240,237,248,0.48);
+  --border:rgba(240,237,248,0.08);
+  --ff-head:'Syne',sans-serif;--ff-body:'DM Sans',sans-serif;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--white);font-family:var(--ff-body)}
+#topbar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--vlt),var(--coral));transition:width .4s ease;z-index:100}
+#deck{width:100%;height:100%;position:relative}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 80px;opacity:0;transform:translateX(60px);transition:opacity .4s ease,transform .4s ease;pointer-events:none}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
+.slide.exit{opacity:0;transform:translateX(-60px)}
+.wm{position:absolute;bottom:22px;left:28px;font-family:var(--ff-head);font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(240,237,248,0.09);text-transform:uppercase;pointer-events:none;user-select:none}
+#dots{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:100}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);border:1.5px solid var(--dim);cursor:pointer;transition:background .2s,transform .2s}
+.dot.on{background:var(--vlt);transform:scale(1.3)}
+#nav{position:fixed;bottom:20px;right:32px;display:flex;gap:10px;z-index:100}
+#nav button{background:var(--surf2);border:1px solid var(--border);color:var(--white);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;transition:background .2s}
+#nav button:hover{background:var(--vlt)}
+.eyebrow{font-family:var(--ff-body);font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--vlt);margin-bottom:12px}
+.slide-title{font-family:var(--ff-head);font-size:clamp(2rem,5vw,3.6rem);font-weight:800;line-height:1.1;margin-bottom:16px;text-align:center}
+.slide-sub{font-size:1.05rem;font-weight:300;color:var(--dim);max-width:640px;text-align:center;line-height:1.6;margin-bottom:28px}
+.accent-vlt{color:var(--vlt)}
+.accent-coral{color:var(--coral)}
+.accent-gold{color:var(--gold)}
+.accent-green{color:var(--green)}
+.card-grid{display:grid;gap:16px;width:100%;max-width:900px}
+.card-grid.g2{grid-template-columns:repeat(2,1fr)}
+.card-grid.g3{grid-template-columns:repeat(3,1fr)}
+.card-grid.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:8px}
+.card-icon{font-size:1.8rem;margin-bottom:4px}
+.card-title{font-family:var(--ff-head);font-size:1rem;font-weight:700}
+.card-body{font-size:.9rem;color:var(--dim);line-height:1.55}
+.card.vlt{border-color:var(--vlt);background:var(--vlt-dim)}
+.card.coral{border-color:var(--coral);background:var(--cor-dim)}
+.card.gold{border-color:var(--gold);background:var(--gld-dim)}
+.card.green{border-color:var(--green);background:var(--grn-dim)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:100%;max-width:900px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;display:flex;flex-direction:column;gap:10px}
+.panel-title{font-family:var(--ff-head);font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.b-text{font-size:.9rem;color:var(--dim);line-height:1.6}
+.cover-kicker{font-size:.8rem;letter-spacing:4px;text-transform:uppercase;color:var(--vlt);font-weight:600;margin-bottom:20px}
+.week-badge{display:inline-block;background:var(--vlt-dim);border:1px solid var(--vlt);border-radius:20px;padding:4px 14px;font-size:.8rem;font-weight:600;color:var(--vlt);margin-bottom:24px}
+/* hierarchy visual */
+.hier-demo{background:var(--surf2);border:1px solid var(--border);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.h-row{display:flex;align-items:center;gap:14px}
+.h-dot{width:10px;height:10px;border-radius:50%;background:var(--vlt);flex-shrink:0}
+.h-dot.sm{width:6px;height:6px;background:var(--dim)}
+.h-bar{height:8px;border-radius:4px;background:var(--vlt-dim)}
+/* spacing demo */
+.sp-demo{display:flex;flex-direction:column;gap:4px;background:var(--surf2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.sp-label{font-size:.7rem;color:var(--vlt);font-weight:600;padding:4px 10px;background:var(--vlt-dim)}
+.sp-block{background:var(--surface);margin:8px;border-radius:6px;padding:10px;font-size:.8rem;color:var(--dim)}
+/* gestalt */
+.gestalt-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.g-title{font-size:.8rem;font-weight:600;color:var(--vlt);text-transform:uppercase;letter-spacing:2px}
+.dot-group{display:flex;flex-wrap:wrap;gap:6px}
+.gdot{width:12px;height:12px;border-radius:50%;background:var(--dim)}
+.gdot.active{background:var(--vlt)}
+/* quote */
+.quote-block{background:var(--surface);border-left:4px solid var(--vlt);border-radius:0 14px 14px 0;padding:28px 32px;max-width:720px;text-align:left}
+.quote-text{font-family:var(--ff-head);font-size:1.4rem;font-weight:700;line-height:1.4;margin-bottom:12px}
+.quote-attr{font-size:.85rem;color:var(--dim)}
+/* activity */
+.activity-box{background:var(--gld-dim);border:2px solid var(--gold);border-radius:16px;padding:32px 40px;max-width:720px;width:100%;display:flex;flex-direction:column;gap:16px}
+.a-title{font-family:var(--ff-head);font-size:1.5rem;font-weight:700;color:var(--gold)}
+.a-sub{font-size:.95rem;color:var(--dim);line-height:1.6}
+.a-steps{display:flex;flex-direction:column;gap:8px;counter-reset:step}
+.a-step{font-size:.9rem;color:var(--white);display:flex;gap:10px;align-items:flex-start}
+.a-step::before{content:counter(step);counter-increment:step;min-width:22px;height:22px;background:var(--gold);color:#000;border-radius:50%;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.contact-row{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.contact-link{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:10px 20px;text-decoration:none;color:var(--white);font-size:.9rem;font-weight:500;transition:border-color .2s,background .2s}
+.contact-link:hover{border-color:var(--vlt);background:var(--vlt-dim)}
+.up-next{display:inline-flex;align-items:center;gap:8px;margin-top:24px;background:var(--vlt);color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:600;font-size:.95rem;transition:background .2s}
+.up-next:hover{background:#6D28D9}
+
+  #pdf-btn { display: none !important; }
+}
+
+/* ── Shared session nav bar ── */
+.sn-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0d9f5;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 2px 8px rgba(91,33,182,0.07);
+  min-height: 48px;
+}
+.sn-bar a, .sn-bar button {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 7px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.sn-back { background: #f0eef9; color: #5B21B6; }
+.sn-back:hover { background: #e0d9f5; }
+.sn-prev, .sn-next { background: #f0eef9; color: #5B21B6; }
+.sn-prev:hover, .sn-next:hover { background: #e0d9f5; }
+.sn-prev[disabled], .sn-next[disabled] { opacity: .35; pointer-events: none; }
+.sn-title { flex: 1; font-size: .88rem; font-weight: 600; color: #1a1830; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sn-download { background: #5B21B6; color: #fff; }
+.sn-download:hover { background: #7C3AED; }
+.sn-theme { background: #f0eef9; color: #5B21B6; font-size: 1rem; padding: 5px 10px; }
+.sn-theme:hover { background: #e0d9f5; }
+/* push deck content below nav bar */
+body > .deck, body > div.deck { padding-top: 48px; }
+/* light theme override */
+[data-theme="light"] .sn-bar { background: #fff; border-color: #e0d9f5; }
+[data-theme="dark"]  .sn-bar { background: #1A1830; border-color: #2E2A4A; }
+[data-theme="dark"]  .sn-title { color: #EDECF4; }
+[data-theme="dark"]  .sn-back, [data-theme="dark"] .sn-prev, [data-theme="dark"] .sn-next, [data-theme="dark"] .sn-theme { background: #2E2A4A; color: #a78bfa; }
+
+/* ── Light theme tokens ── */
+[data-theme="light"] {
+  --bg: #FAFAF8 !important;
+  --bg2: #F0EEF9 !important;
+  --surface: #fff !important;
+  --surf2: #F0EEF9 !important;
+  --white: #0F0E17 !important;
+  --dim: rgba(15,14,23,0.55) !important;
+  --dim2: rgba(15,14,23,0.35) !important;
+  --border: rgba(91,33,182,0.12) !important;
+}
+[data-theme="light"] html, [data-theme="light"] body,
+html[data-theme="light"], body[data-theme="light"] {
+  background: #FAFAF8 !important;
+  color: #0F0E17 !important;
+}
+[data-theme="light"] .slide,
+[data-theme="light"] .slide * { color: inherit; }
+
+/* ── Print CSS (clean PDF) ── */
+@media print {
+  .sn-bar { display: none !important; }
+  body { padding-top: 0 !important; }
+  body > .deck { padding-top: 0 !important; }
+  .botnav, #nav, .nav-row, [id="prev"], [id="next"], #dots, .dot, .prog, .topbar, .tb-count { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; overflow: visible !important; height: auto !important; }
+  .slide { display: none !important; page-break-after: always; break-after: page; position: relative !important; height: 100vh !important; opacity: 1 !important; transform: none !important; }
+  .slide.active { display: flex !important; background: #fff !important; }
+  .stage { overflow: visible !important; height: auto !important; }
+  .deck { height: auto !important; overflow: visible !important; padding-top: 0 !important; }
+}
+</style>
+</head>
+<body>
+<!-- ── Session Nav Bar ── -->
+<div class="sn-bar" id="snBar">
+  <a class="sn-back" href="../site/sessions.html">← Sessions</a>
+  <a class="sn-prev" href="session_05.html?n=5">‹ S05</a>
+  <span class="sn-title">S06 · Visual Design Basics</span>
+  <a class="sn-next" href="session_07.html?n=7">S07 ›</a>
+  <button class="sn-download sn-bar" onclick="window.print()">⬇ PDF</button>
+  <button class="sn-theme" id="snTheme" title="Toggle theme">🌙</button>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('snTheme');
+  var root = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('dk-session-theme'); } catch(e){}
+  // default to light
+  if (!saved) saved = 'light';
+  root.setAttribute('data-theme', saved);
+  btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+  btn.addEventListener('click', function(){
+    var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('dk-session-theme', t); } catch(e){}
+  });
+})();
+</script>
+<div id="topbar"></div>
+<div id="deck">
+
+<!-- SLIDE 1: COVER -->
+<section class="slide active">
+  <div class="cover-kicker">Designer_Kid Studios · Week 2</div>
+  <div class="week-badge">Session 06 of 20</div>
+  <h1 class="slide-title">Visual Design <span class="accent-vlt">Basics</span></h1>
+  <p class="slide-sub">Space, hierarchy, alignment, and contrast — the four forces that make layouts feel intentional.</p>
+</section>
+
+<!-- SLIDE 2: AGENDA -->
+<section class="slide">
+  <div class="eyebrow">Today's Session</div>
+  <h2 class="slide-title" style="font-size:2.4rem">What We'll Cover</h2>
+  <div class="card-grid g2" style="max-width:700px">
+    <div class="card vlt"><div class="card-icon">📐</div><div class="card-title">Visual Hierarchy</div><div class="card-body">Guiding the eye to what matters most first</div></div>
+    <div class="card vlt"><div class="card-icon">⬜</div><div class="card-title">White Space</div><div class="card-body">Why nothing is sometimes everything</div></div>
+    <div class="card vlt"><div class="card-icon">📏</div><div class="card-title">Alignment &amp; Grids</div><div class="card-body">The invisible skeleton that holds layouts together</div></div>
+    <div class="card vlt"><div class="card-icon">🎨</div><div class="card-title">Contrast &amp; Balance</div><div class="card-body">Making elements pop without causing visual chaos</div></div>
+  </div>
+</section>
+
+<!-- SLIDE 3: VISUAL HIERARCHY -->
+<section class="slide">
+  <div class="eyebrow">Visual Hierarchy</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Guiding the Eye</h2>
+  <p class="slide-sub" style="margin-bottom:20px">Users don't read interfaces — they scan. Hierarchy tells them where to look first, second, and last.</p>
+  <div class="two-col" style="max-width:860px">
+    <div class="panel">
+      <div class="panel-title">The 4 Levers of Hierarchy</div>
+      <div class="b-text">
+        <strong style="color:var(--white)">Size</strong> — Big = important. Headlines dominate body text.<br><br>
+        <strong style="color:var(--white)">Colour</strong> — High contrast pulls attention first.<br><br>
+        <strong style="color:var(--white)">Weight</strong> — Bold text reads before regular weight.<br><br>
+        <strong style="color:var(--white)">Position</strong> — Top-left is where Western eyes land first.
+      </div>
+    </div>
+    <div class="hier-demo">
+      <div style="font-family:var(--ff-head);font-size:22px;font-weight:800;color:var(--white)">Buy Now <span style="font-size:10px;font-weight:400;color:var(--vlt);background:var(--vlt-dim);padding:2px 8px;border-radius:4px">① seen first</span></div>
+      <div style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--white);margin-top:4px">Premium Plan <span style="font-size:10px;font-weight:400;color:var(--gold);background:var(--gld-dim);padding:2px 8px;border-radius:4px">② bold</span></div>
+      <div style="font-size:12px;font-weight:300;color:var(--dim);line-height:1.5;margin-top:6px">Everything you need to design and ship faster. <span style="font-size:10px;color:var(--dim);background:var(--border);padding:2px 8px;border-radius:4px">③ last</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4: WHITE SPACE -->
+<section class="slide">
+  <div class="eyebrow">White Space</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Breathing Room Isn't Wasted Space</h2>
+  <p class="slide-sub" style="margin-bottom:20px">White space (also called negative space) reduces cognitive load and makes the important elements easier to find.</p>
+  <div class="card-grid g3" style="max-width:860px">
+    <div class="card">
+      <div class="card-icon">🫧</div>
+      <div class="card-title">Micro Space</div>
+      <div class="card-body">Space between letters, lines, and closely related elements. Controls readability.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <div class="card-title">Macro Space</div>
+      <div class="card-body">Space between sections and major page blocks. Creates rhythm and visual flow.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏷️</div>
+      <div class="card-title">Padding vs Margin</div>
+      <div class="card-body">Padding is space inside a component. Margin is space outside it. Both matter.</div>
+    </div>
+  </div>
+  <div style="margin-top:20px;background:var(--vlt-dim);border:1px solid var(--vlt);border-radius:10px;padding:14px 24px;max-width:700px;font-size:.9rem;color:var(--dim)">
+    💡 Luxury brands use more white space than discount brands — subconsciously, space signals quality and care.
+  </div>
+</section>
+
+<!-- SLIDE 5: ALIGNMENT -->
+<section class="slide">
+  <div class="eyebrow">Alignment</div>
+  <h2 class="slide-title" style="font-size:2.2rem">The Invisible Grid</h2>
+  <p class="slide-sub" style="margin-bottom:20px">Every element on a screen should visually connect to something else. Misaligned elements create tension and feel unfinished.</p>
+  <div class="card-grid g4" style="max-width:900px">
+    <div class="card vlt">
+      <div class="card-icon">⬅️</div>
+      <div class="card-title">Left Align</div>
+      <div class="card-body">Most natural for text. Easy scanline for the eye.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">↔️</div>
+      <div class="card-title">Centre Align</div>
+      <div class="card-body">Good for hero sections and short, impactful copy.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">➡️</div>
+      <div class="card-title">Right Align</div>
+      <div class="card-body">Useful for numbers in tables and secondary actions.</div>
+    </div>
+    <div class="card gold">
+      <div class="card-icon">📏</div>
+      <div class="card-title">Grid System</div>
+      <div class="card-body">12-column grids keep layouts consistent across breakpoints.</div>
+    </div>
+  </div>
+  <div style="margin-top:20px;font-size:.9rem;color:var(--dim);text-align:center">Rule: Never mix alignment styles in the same group of elements. Consistency reads as competence.</div>
+</section>
+
+<!-- SLIDE 6: CONTRAST -->
+<section class="slide">
+  <div class="eyebrow">Contrast</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Make Things Pop</h2>
+  <p class="slide-sub" style="margin-bottom:20px">Contrast isn't just about readability — it directs attention and creates visual interest.</p>
+  <div class="two-col" style="max-width:860px">
+    <div class="panel">
+      <div class="panel-title">Types of Contrast</div>
+      <div class="b-text">
+        <strong style="color:var(--white)">Colour contrast</strong> — Light vs dark, vibrant vs muted<br><br>
+        <strong style="color:var(--white)">Size contrast</strong> — Large headlines vs small body text<br><br>
+        <strong style="color:var(--white)">Weight contrast</strong> — Bold labels vs light descriptions<br><br>
+        <strong style="color:var(--white)">Shape contrast</strong> — Round pill buttons vs sharp rectangular inputs
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title accent-coral">Low Contrast (Bad)</div>
+      <div style="background:#2a2a2a;border-radius:8px;padding:16px;margin-bottom:14px">
+        <div style="font-size:.85rem;color:#444;font-weight:400">This text is hard to read on a dark background</div>
+      </div>
+      <div class="panel-title accent-green">High Contrast (Good)</div>
+      <div style="background:#1E1B32;border-radius:8px;padding:16px">
+        <div style="font-size:.85rem;color:#F0EDF8;font-weight:400">This text is clear and easy to read</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7: GESTALT PRINCIPLES -->
+<section class="slide">
+  <div class="eyebrow">Gestalt Principles</div>
+  <h2 class="slide-title" style="font-size:2.2rem">How the Brain Groups Things</h2>
+  <p class="slide-sub" style="margin-bottom:20px">Gestalt is why we perceive designs as organised wholes — your brain finds patterns automatically.</p>
+  <div class="card-grid g2" style="max-width:860px">
+    <div class="gestalt-box">
+      <div class="g-title">Proximity — nearby = related</div>
+      <div class="dot-group">
+        <div class="gdot active"></div><div class="gdot active"></div><div class="gdot active"></div>
+        <div style="width:20px"></div>
+        <div class="gdot"></div><div class="gdot"></div><div class="gdot"></div>
+      </div>
+      <div style="font-size:.8rem;color:var(--dim)">The left cluster reads as a group; the right as a separate one.</div>
+    </div>
+    <div class="gestalt-box">
+      <div class="g-title">Similarity — alike = grouped</div>
+      <div class="dot-group">
+        <div class="gdot active"></div><div class="gdot"></div><div class="gdot active"></div>
+        <div class="gdot"></div><div class="gdot active"></div><div class="gdot"></div>
+      </div>
+      <div style="font-size:.8rem;color:var(--dim)">Same colour creates columns even though spacing is even.</div>
+    </div>
+    <div class="gestalt-box">
+      <div class="g-title">Closure — gaps get filled</div>
+      <div style="font-size:2rem;letter-spacing:2px;color:var(--white)">( )</div>
+      <div style="font-size:.8rem;color:var(--dim)">Broken shapes are completed in the mind — logos exploit this.</div>
+    </div>
+    <div class="gestalt-box">
+      <div class="g-title">Continuity — eye follows lines</div>
+      <div style="height:20px;background:linear-gradient(90deg,var(--vlt),var(--coral));border-radius:4px"></div>
+      <div style="font-size:.8rem;color:var(--dim)">Progress bars and timelines exploit natural eye-tracking paths.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8: VISUAL BALANCE -->
+<section class="slide">
+  <div class="eyebrow">Balance</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Symmetric vs Asymmetric</h2>
+  <div class="two-col" style="max-width:860px">
+    <div class="panel">
+      <div class="panel-title accent-vlt">Symmetric Balance</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0">
+        <div style="background:var(--surf2);height:60px;border-radius:8px"></div>
+        <div style="background:var(--surf2);height:60px;border-radius:8px"></div>
+        <div style="background:var(--surf2);height:40px;border-radius:8px"></div>
+        <div style="background:var(--surf2);height:40px;border-radius:8px"></div>
+      </div>
+      <div class="b-text">Even weight on both sides. Feels calm, stable, and formal. Good for corporate and editorial layouts.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title accent-coral">Asymmetric Balance</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin:8px 0">
+        <div style="background:var(--vlt-dim);border:1px solid var(--vlt);height:80px;border-radius:8px"></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:var(--surf2);height:36px;border-radius:8px"></div>
+          <div style="background:var(--surf2);height:36px;border-radius:8px"></div>
+        </div>
+      </div>
+      <div class="b-text">Different weights balanced by contrast and colour. Feels dynamic and modern. Popular in tech and editorial design.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 9: KEY TAKEAWAY -->
+<section class="slide">
+  <div class="eyebrow">Key Takeaway</div>
+  <div class="quote-block">
+    <div class="quote-text">"Good visual design is invisible. Viewers feel the clarity; they don't see the grid."</div>
+    <div class="quote-attr">— Visual Design Principle</div>
+  </div>
+  <div class="card-grid g4" style="max-width:900px;margin-top:28px">
+    <div class="card" style="text-align:center"><div class="card-icon">📐</div><div class="card-title">Hierarchy</div><div class="card-body">Guide the scan path intentionally</div></div>
+    <div class="card" style="text-align:center"><div class="card-icon">⬜</div><div class="card-title">Space</div><div class="card-body">Breathing room signals quality</div></div>
+    <div class="card" style="text-align:center"><div class="card-icon">📏</div><div class="card-title">Alignment</div><div class="card-body">Everything connects to something</div></div>
+    <div class="card" style="text-align:center"><div class="card-icon">🎨</div><div class="card-title">Contrast</div><div class="card-body">Draw the eye before colour does</div></div>
+  </div>
+</section>
+
+<!-- SLIDE 10: ACTIVITY -->
+<section class="slide">
+  <div class="eyebrow">Hands-On Activity</div>
+  <div class="activity-box">
+    <div class="a-title">🎨 Visual Redesign Challenge</div>
+    <div class="a-sub">Take a bad layout and fix it using hierarchy, space, and contrast — 20 mins · 10 mins share</div>
+    <div class="a-steps">
+      <div class="a-step">Open or sketch a basic landing page with 1 headline, 2 body paragraphs, and 1 CTA button</div>
+      <div class="a-step">Identify what the eye hits first — is it the right thing? If not, adjust size and weight.</div>
+      <div class="a-step">Add breathing room: double the padding around sections and between elements</div>
+      <div class="a-step">Check contrast: can you read the body text on the background clearly?</div>
+      <div class="a-step">Share your before/after — what one change made the biggest difference?</div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 11: UP NEXT -->
+<section class="slide">
+  <div class="eyebrow">Wrapping Up · Session 06</div>
+  <h2 class="slide-title" style="font-size:2.6rem">Great Work Today 🎉</h2>
+  <p class="slide-sub">You now have the visual vocabulary to critique and improve any layout. Next: the UI components designers use every day.</p>
+  <div class="contact-row">
+    <a class="contact-link" href="https://wa.me/919686959787" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      WhatsApp
+    </a>
+    <a class="contact-link" href="http://linkedin.com/in/harikrishnam-raju/" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      LinkedIn
+    </a>
+    <a class="contact-link" href="https://www.behance.net/rajuvegeshana" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#1769FF"><path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029H23.72zm-7.726-3h3.578c-.118-1.662-1.118-2.108-1.742-2.108-.701 0-1.713.358-1.836 2.108zM8.994 6.987c1.678 0 3.773.513 3.773 3.007 0 1.686-1.1 2.286-1.696 2.566.978.3 2.354.887 2.354 2.9 0 2.908-2.187 3.652-4.321 3.652H2V6.987h6.994zm-1.178 5.008c.779 0 2.04-.164 2.04-1.424 0-1.218-1.146-1.416-2.04-1.416H5.432v2.84h2.384zm.196 5.237c.877 0 2.13-.173 2.13-1.623 0-1.513-1.215-1.628-2.13-1.628H5.432v3.251h2.58z"/></svg>
+      Behance
+    </a>
+  </div>
+  <a class="up-next" href="session_07.html">Up Next: UI Components &amp; Patterns →</a>
+</section>
+
+</div><!-- /deck -->
+<div id="dots"></div>
+<div id="nav"><button id="prev">‹</button><button id="next">›</button></div>
+<template id="wm"><div class="wm">DESIGNER_KID</div></template>
+<script>
+const slides=Array.from(document.querySelectorAll('.slide'));
+const total=slides.length;let current=0;
+const dotsEl=document.getElementById('dots');
+const bar=document.getElementById('topbar');
+slides.forEach(s=>s.appendChild(document.getElementById('wm').content.cloneNode(true)));
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' on':'');d.addEventListener('click',()=>goTo(i));dotsEl.appendChild(d);});
+function updateUI(){document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===current));bar.style.width=((current+1)/total*100)+'%';}
+function goTo(n){if(n<0||n>=total)return;slides[current].classList.remove('active');slides[current].classList.add('exit');setTimeout(()=>slides[current].classList.remove('exit'),450);current=n;slides[current].classList.add('active');updateUI();}
+document.getElementById('prev').addEventListener('click',()=>goTo(current-1));
+document.getElementById('next').addEventListener('click',()=>goTo(current+1));
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(current+1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(current-1);});
+updateUI();
+
+  // PDF download button
+  (function(){
+    var btn = document.createElement('button');
+    btn.id = 'pdf-btn';
+    btn.textContent = '⬇ Save PDF';
+    btn.setAttribute('title', 'Print / Save as PDF');
+    btn.style.cssText = 'position:fixed;bottom:18px;right:18px;z-index:9999;padding:8px 16px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    btn.addEventListener('click', function(){ window.print(); });
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
+    // fallback if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') document.body.appendChild(btn);
+  })();
+</script>
+</body>
+</html>

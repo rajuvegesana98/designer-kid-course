@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 14 — Accessibility & Inclusive Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F0E17;--surface:#1E1B32;--surf2:#252240;
+  --violet:#5B21B6;--vlt:#7C3AED;--vlt-dim:rgba(124,58,237,.18);
+  --coral:#F4574A;--cor-dim:rgba(244,87,74,.14);
+  --gold:#F5C518;--gld-dim:rgba(245,197,24,.13);
+  --green:#34D399;--grn-dim:rgba(52,211,153,.10);
+  --white:#F0EDF8;--dim:rgba(240,237,248,.48);
+  --border:rgba(240,237,248,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;height:100vh;overflow:hidden}
+.topbar{position:fixed;top:0;left:0;width:0%;height:3px;background:var(--vlt);transition:width .4s;z-index:100}
+.stage{width:100vw;height:100vh;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;padding:52px 64px 72px;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateX(60px);transition:opacity .45s,transform .45s;pointer-events:none}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
+.slide.exit{opacity:0;transform:translateX(-60px)}
+.eyebrow{font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--vlt);margin-bottom:12px}
+.slide-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:800;line-height:1.1;margin-bottom:8px}
+.slide-title span{color:var(--vlt)}
+.slide-sub{font-size:1rem;color:var(--dim);font-weight:400;margin-bottom:32px;max-width:620px}
+.cards{display:grid;gap:16px;margin-top:8px}
+.cards.c2{grid-template-columns:1fr 1fr}
+.cards.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card.vlt{border-top:3px solid var(--vlt)}
+.card.coral{border-top:3px solid var(--coral)}
+.card.gold{border-top:3px solid var(--gold)}
+.card.green{border-top:3px solid var(--green)}
+.card.vlt-l{border-left:3px solid var(--vlt)}
+.card.grn-l{border-left:3px solid var(--green)}
+.card.cor-l{border-left:3px solid var(--coral)}
+.card-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--vlt);margin-bottom:6px}
+.card-label.green{color:var(--green)}
+.card-label.coral{color:var(--coral)}
+.card-label.gold{color:var(--gold)}
+.card-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:6px}
+.card-body{font-size:.85rem;color:var(--dim);line-height:1.55}
+.analogy{background:var(--vlt-dim);border:1px solid rgba(124,58,237,.3);border-radius:10px;padding:16px 20px;margin-top:16px}
+.analogy-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--vlt);margin-bottom:4px}
+.analogy p{font-size:.88rem;color:var(--dim);line-height:1.55}
+.q-block{border-left:4px solid var(--vlt);padding:16px 24px;margin:16px 0;background:var(--vlt-dim);border-radius:0 8px 8px 0}
+.q-block p{font-size:1.05rem;font-style:italic;color:var(--white);line-height:1.6}
+.activity-box{background:var(--gld-dim);border:1px solid rgba(245,197,24,.25);border-radius:12px;padding:24px}
+.activity-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.step{display:flex;gap:12px;margin-bottom:10px;align-items:flex-start}
+.step-n{width:26px;height:26px;border-radius:50%;background:var(--gold);color:#0F0E17;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step p{font-size:.88rem;color:var(--white);line-height:1.5}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.tag{font-size:.7rem;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--surface);border:1px solid var(--border);color:var(--dim)}
+.agenda-list{display:flex;flex-direction:column;gap:0}
+.ag-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+.ag-num{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--vlt);width:32px}
+.ag-title{font-size:.95rem;font-weight:600;color:var(--white)}
+.ag-sub{font-size:.78rem;color:var(--dim)}
+.wcag-row{display:flex;gap:12px;margin-top:16px}
+.wcag-chip{flex:1;border-radius:10px;padding:16px;text-align:center}
+.wcag-chip.a{background:var(--grn-dim);border:1px solid rgba(52,211,153,.25)}
+.wcag-chip.aa{background:var(--vlt-dim);border:1px solid rgba(124,58,237,.3)}
+.wcag-chip.aaa{background:var(--gld-dim);border:1px solid rgba(245,197,24,.25)}
+.wcag-level{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800}
+.wcag-label{font-size:.72rem;color:var(--dim);margin-top:4px}
+.nav{position:fixed;bottom:28px;right:48px;display:flex;gap:10px;z-index:50}
+.nav button{background:var(--surface);border:1px solid var(--border);color:var(--white);width:40px;height:40px;border-radius:50%;font-size:1rem;cursor:pointer;transition:background .2s}
+.nav button:hover{background:var(--vlt)}
+.dots{position:fixed;bottom:34px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:50}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s}
+.dot.on{background:var(--vlt);transform:scale(1.4)}
+.wm{position:absolute;bottom:18px;left:22px;z-index:50;opacity:.18;pointer-events:none;font-family:'Syne',sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.08em;color:var(--white)}
+.contact-row{display:flex;gap:20px;align-items:center;margin-top:20px}
+.c-link{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--dim);font-size:.82rem;transition:color .2s}
+.c-link:hover{color:var(--white)}
+.next-card{display:inline-flex;align-items:center;gap:10px;background:var(--vlt-dim);border:1px solid rgba(124,58,237,.35);border-radius:12px;padding:16px 24px;text-decoration:none;color:var(--white);margin-top:20px;transition:background .2s}
+.next-card:hover{background:rgba(124,58,237,.3)}
+.next-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--vlt);margin-bottom:2px}
+.next-title{font-size:.95rem;font-weight:600}
+
+  #pdf-btn { display: none !important; }
+}
+
+/* ── Shared session nav bar ── */
+.sn-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0d9f5;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 2px 8px rgba(91,33,182,0.07);
+  min-height: 48px;
+}
+.sn-bar a, .sn-bar button {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 7px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.sn-back { background: #f0eef9; color: #5B21B6; }
+.sn-back:hover { background: #e0d9f5; }
+.sn-prev, .sn-next { background: #f0eef9; color: #5B21B6; }
+.sn-prev:hover, .sn-next:hover { background: #e0d9f5; }
+.sn-prev[disabled], .sn-next[disabled] { opacity: .35; pointer-events: none; }
+.sn-title { flex: 1; font-size: .88rem; font-weight: 600; color: #1a1830; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sn-download { background: #5B21B6; color: #fff; }
+.sn-download:hover { background: #7C3AED; }
+.sn-theme { background: #f0eef9; color: #5B21B6; font-size: 1rem; padding: 5px 10px; }
+.sn-theme:hover { background: #e0d9f5; }
+/* push deck content below nav bar */
+body > .deck, body > div.deck { padding-top: 48px; }
+/* light theme override */
+[data-theme="light"] .sn-bar { background: #fff; border-color: #e0d9f5; }
+[data-theme="dark"]  .sn-bar { background: #1A1830; border-color: #2E2A4A; }
+[data-theme="dark"]  .sn-title { color: #EDECF4; }
+[data-theme="dark"]  .sn-back, [data-theme="dark"] .sn-prev, [data-theme="dark"] .sn-next, [data-theme="dark"] .sn-theme { background: #2E2A4A; color: #a78bfa; }
+
+/* ── Light theme tokens ── */
+[data-theme="light"] {
+  --bg: #FAFAF8 !important;
+  --bg2: #F0EEF9 !important;
+  --surface: #fff !important;
+  --surf2: #F0EEF9 !important;
+  --white: #0F0E17 !important;
+  --dim: rgba(15,14,23,0.55) !important;
+  --dim2: rgba(15,14,23,0.35) !important;
+  --border: rgba(91,33,182,0.12) !important;
+}
+[data-theme="light"] html, [data-theme="light"] body,
+html[data-theme="light"], body[data-theme="light"] {
+  background: #FAFAF8 !important;
+  color: #0F0E17 !important;
+}
+[data-theme="light"] .slide,
+[data-theme="light"] .slide * { color: inherit; }
+
+/* ── Print CSS (clean PDF) ── */
+@media print {
+  .sn-bar { display: none !important; }
+  body { padding-top: 0 !important; }
+  body > .deck { padding-top: 0 !important; }
+  .botnav, #nav, .nav-row, [id="prev"], [id="next"], #dots, .dot, .prog, .topbar, .tb-count { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; overflow: visible !important; height: auto !important; }
+  .slide { display: none !important; page-break-after: always; break-after: page; position: relative !important; height: 100vh !important; opacity: 1 !important; transform: none !important; }
+  .slide.active { display: flex !important; background: #fff !important; }
+  .stage { overflow: visible !important; height: auto !important; }
+  .deck { height: auto !important; overflow: visible !important; padding-top: 0 !important; }
+}
+</style>
+</head>
+<body>
+<!-- ── Session Nav Bar ── -->
+<div class="sn-bar" id="snBar">
+  <a class="sn-back" href="../site/sessions.html">← Sessions</a>
+  <a class="sn-prev" href="session_13.html?n=13">‹ S13</a>
+  <span class="sn-title">S14 · Accessibility & Inclusion</span>
+  <a class="sn-next" href="session_15.html?n=15">S15 ›</a>
+  <button class="sn-download sn-bar" onclick="window.print()">⬇ PDF</button>
+  <button class="sn-theme" id="snTheme" title="Toggle theme">🌙</button>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('snTheme');
+  var root = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('dk-session-theme'); } catch(e){}
+  // default to light
+  if (!saved) saved = 'light';
+  root.setAttribute('data-theme', saved);
+  btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+  btn.addEventListener('click', function(){
+    var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('dk-session-theme', t); } catch(e){}
+  });
+})();
+</script>
+<div class="topbar" id="bar"></div>
+<template id="wm"><div class="wm">DESIGNER_KID</div></template>
+<div class="stage" id="stage">
+
+<!-- Slide 1: Cover -->
+<div class="slide">
+  <div class="eyebrow">Week 4 · Session 14</div>
+  <div class="slide-title">Accessibility &<br><span>Inclusive Design</span></div>
+  <div class="slide-sub">Designing for everyone — not just the "average" user</div>
+  <div class="tags">
+    <span class="tag">WCAG Basics</span>
+    <span class="tag">Contrast & Colour</span>
+    <span class="tag">Screen Readers</span>
+    <span class="tag">Inclusive Thinking</span>
+  </div>
+</div>
+
+<!-- Slide 2: Agenda -->
+<div class="slide">
+  <div class="eyebrow">What we'll cover today</div>
+  <div class="slide-title">Session <span>Agenda</span></div>
+  <div class="agenda-list">
+    <div class="ag-row"><span class="ag-num">01</span><div><div class="ag-title">What is Accessibility?</div><div class="ag-sub">Why it matters and who benefits</div></div></div>
+    <div class="ag-row"><span class="ag-num">02</span><div><div class="ag-title">WCAG Guidelines</div><div class="ag-sub">A, AA, AAA — what the levels mean</div></div></div>
+    <div class="ag-row"><span class="ag-num">03</span><div><div class="ag-title">Contrast & Colour</div><div class="ag-sub">Making text readable for all</div></div></div>
+    <div class="ag-row"><span class="ag-num">04</span><div><div class="ag-title">Inclusive Design Principles</div><div class="ag-sub">Designing beyond disability</div></div></div>
+    <div class="ag-row"><span class="ag-num">05</span><div><div class="ag-title">Activity</div><div class="ag-sub">Audit a screen for accessibility issues</div></div></div>
+  </div>
+</div>
+
+<!-- Slide 3: What is Accessibility -->
+<div class="slide">
+  <div class="eyebrow">The foundation</div>
+  <div class="slide-title">What is <span>Accessibility?</span></div>
+  <div class="slide-sub">Designing so that every person — regardless of ability — can use your product.</div>
+  <div class="cards c2" style="margin-top:16px">
+    <div class="card vlt">
+      <div class="card-label">Visual</div>
+      <div class="card-title">Low vision, colour blindness, blindness</div>
+      <div class="card-body">Need high contrast, alt text, screen reader support</div>
+    </div>
+    <div class="card coral">
+      <div class="card-label coral">Motor</div>
+      <div class="card-title">Limited hand movement or dexterity</div>
+      <div class="card-body">Need large tap targets, keyboard navigation</div>
+    </div>
+    <div class="card gold">
+      <div class="card-label gold">Cognitive</div>
+      <div class="card-title">Dyslexia, ADHD, memory challenges</div>
+      <div class="card-body">Need clear language, consistent patterns, no clutter</div>
+    </div>
+    <div class="card green">
+      <div class="card-label green">Hearing</div>
+      <div class="card-title">Deaf or hard of hearing</div>
+      <div class="card-body">Need captions, transcripts, visual alerts</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: WCAG Levels -->
+<div class="slide">
+  <div class="eyebrow">The rulebook</div>
+  <div class="slide-title">WCAG <span>Guidelines</span></div>
+  <div class="slide-sub">Web Content Accessibility Guidelines — the global standard for accessible design.</div>
+  <div class="wcag-row">
+    <div class="wcag-chip a"><div class="wcag-level" style="color:var(--green)">A</div><div class="wcag-label">Minimum<br>Basic must-haves</div></div>
+    <div class="wcag-chip aa"><div class="wcag-level" style="color:var(--vlt)">AA</div><div class="wcag-label">Standard<br>Most apps aim here</div></div>
+    <div class="wcag-chip aaa"><div class="wcag-level" style="color:var(--gold)">AAA</div><div class="wcag-label">Enhanced<br>Best possible experience</div></div>
+  </div>
+  <div class="analogy" style="margin-top:16px">
+    <div class="analogy-label">Real-world equivalent</div>
+    <p>Think of it like building codes. Level A = no open ditches in the floor. Level AA = ramps at entrances. Level AAA = braille on every sign.</p>
+  </div>
+</div>
+
+<!-- Slide 5: Contrast & Colour -->
+<div class="slide">
+  <div class="eyebrow">Most common issue</div>
+  <div class="slide-title">Contrast &amp; <span>Colour</span></div>
+  <div class="slide-sub">Low contrast text is the #1 accessibility failure — easy to fix, easy to test.</div>
+  <div class="cards c2" style="margin-top:16px">
+    <div class="card grn-l">
+      <div class="card-label green">AA Standard</div>
+      <div class="card-title">4.5:1 contrast ratio</div>
+      <div class="card-body">Required for normal text. Use tools like Colour Contrast Checker or Figma plugins to verify.</div>
+    </div>
+    <div class="card vlt-l">
+      <div class="card-label">Large Text</div>
+      <div class="card-title">3:1 contrast ratio</div>
+      <div class="card-body">Applies to text 18px+ (bold) or 24px+ (regular). Easier threshold but still critical.</div>
+    </div>
+    <div class="card cor-l" style="grid-column:span 2">
+      <div class="card-label coral">Don't rely on colour alone</div>
+      <div class="card-title">Colour blindness affects 1 in 12 men</div>
+      <div class="card-body">Always pair colour with an icon, label, or shape. "Red = error" doesn't work if someone can't see red.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6: Inclusive Design Principles -->
+<div class="slide">
+  <div class="eyebrow">Beyond disability</div>
+  <div class="slide-title">Inclusive <span>Design Principles</span></div>
+  <div class="slide-sub">Accessibility helps disabled users. Inclusive design helps everyone.</div>
+  <div class="cards c3" style="margin-top:12px">
+    <div class="card vlt">
+      <div class="card-title">Flexible Use</div>
+      <div class="card-body">Support different ways of interacting — tap, type, voice, click.</div>
+    </div>
+    <div class="card coral">
+      <div class="card-title">Forgiving Design</div>
+      <div class="card-body">Undo, confirm before delete, clear error messages. Everyone makes mistakes.</div>
+    </div>
+    <div class="card gold">
+      <div class="card-title">Plain Language</div>
+      <div class="card-body">Short sentences, simple words. Not dumbing down — smarting up.</div>
+    </div>
+    <div class="card green">
+      <div class="card-title">Clear Hierarchy</div>
+      <div class="card-body">Headings, labels, and structure help screen readers and skimmers alike.</div>
+    </div>
+    <div class="card vlt" style="grid-column:span 2">
+      <div class="card-title">Curb Cut Effect</div>
+      <div class="card-body">Kerb cuts (ramps) were built for wheelchairs — but cyclists, parents with prams, and delivery riders use them daily. Accessible design helps far more people than you think.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7: Key Takeaway -->
+<div class="slide">
+  <div class="eyebrow">Remember this</div>
+  <div class="slide-title">Key <span>Takeaway</span></div>
+  <div class="q-block" style="margin-top:24px">
+    <p>"Accessible design isn't a feature you add at the end — it's a quality standard you build in from day one."</p>
+  </div>
+  <div class="cards c3" style="margin-top:20px">
+    <div class="card vlt-l"><div class="card-body">Check contrast on every text element — use a free tool</div></div>
+    <div class="card grn-l"><div class="card-body">Never use colour as the only signal for state or meaning</div></div>
+    <div class="card cor-l"><div class="card-body">Test with keyboard-only navigation — no mouse</div></div>
+  </div>
+</div>
+
+<!-- Slide 8: Activity -->
+<div class="slide">
+  <div class="eyebrow">Hands-on practice</div>
+  <div class="slide-title">Session <span>Activity</span></div>
+  <div class="activity-box" style="margin-top:16px">
+    <div class="activity-label">Accessibility Audit</div>
+    <div class="step"><div class="step-n">1</div><p>Pick any app or website you use daily (Swiggy, Instagram, etc.)</p></div>
+    <div class="step"><div class="step-n">2</div><p>Check 3 screens for: low contrast text, colour-only signals, small tap targets (&lt;44px)</p></div>
+    <div class="step"><div class="step-n">3</div><p>Note 2 issues you found and 1 thing they did well</p></div>
+    <div class="step"><div class="step-n">4</div><p>Share your audit with the group — discuss what the fix would be</p></div>
+    <div class="tags" style="margin-top:8px">
+      <span class="tag">20 min activity</span>
+      <span class="tag">10 min share</span>
+      <span class="tag">10 min Q&A</span>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9: Up Next + Contact -->
+<div class="slide">
+  <div class="eyebrow">Session Complete</div>
+  <div class="slide-title">Well done <span>today!</span></div>
+  <div class="slide-sub">You now understand accessibility standards and how to design inclusively from the start.</div>
+  <a href="session_15.html" class="next-card">
+    <div>
+      <div class="next-label">Up Next → Session 15</div>
+      <div class="next-title">Design Systems & Component Libraries</div>
+    </div>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4l6 6-6 6" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+  <div class="contact-row">
+    <a class="c-link" href="https://wa.me/919686959787" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--green)"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp
+    </a>
+    <a class="c-link" href="http://linkedin.com/in/harikrishnam-raju/" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      LinkedIn
+    </a>
+    <a class="c-link" href="https://www.behance.net/rajuvegeshana" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#1769FF"><path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029H23.726zm-7.726-3h3.543c-.395-1.893-3.274-2.023-3.543 0zM8 11.909c1.551-.58 2.359-1.63 2.359-3.203C10.359 6.53 8.951 5 5.817 5H0v14h6.396c3.109 0 4.968-1.675 4.968-4.484 0-1.706-.896-2.95-3.364-3.607zM3 7.5h2.801c1.63 0 2.16.65 2.16 1.651 0 .97-.524 1.672-2.16 1.672H3V7.5zm0 9V13h3.202c1.724 0 2.386.698 2.386 1.77 0 1.177-.786 1.73-2.386 1.73H3z"/></svg>
+      Behance
+    </a>
+  </div>
+</div>
+
+</div><!-- /stage -->
+
+<div class="dots" id="dots"></div>
+<div class="nav">
+  <button id="prev">&#8592;</button>
+  <button id="next">&#8594;</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const dotsEl = document.getElementById('dots');
+const bar = document.getElementById('bar');
+let current = 0;
+
+slides.forEach((_,i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0?' on':'');
+  d.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(d);
+});
+
+document.querySelectorAll('.slide').forEach(s => {
+  const t = document.getElementById('wm');
+  s.appendChild(t.content.cloneNode(true));
+});
+
+function goTo(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add('exit');
+  setTimeout(() => slides[current].classList.remove('exit'), 460);
+  current = n;
+  slides[current].classList.add('active');
+  updateUI();
+}
+
+function updateUI() {
+  document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i===current));
+  bar.style.width = ((current+1)/slides.length*100) + '%';
+}
+
+slides[0].classList.add('active');
+document.getElementById('prev').addEventListener('click', () => goTo(current - 1));
+document.getElementById('next').addEventListener('click', () => goTo(current + 1));
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+});
+
+updateUI();
+
+  // PDF download button
+  (function(){
+    var btn = document.createElement('button');
+    btn.id = 'pdf-btn';
+    btn.textContent = '⬇ Save PDF';
+    btn.setAttribute('title', 'Print / Save as PDF');
+    btn.style.cssText = 'position:fixed;bottom:18px;right:18px;z-index:9999;padding:8px 16px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    btn.addEventListener('click', function(){ window.print(); });
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
+    // fallback if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') document.body.appendChild(btn);
+  })();
+</script>
+</body>
+</html>

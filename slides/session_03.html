@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Users & UX Research</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap">
+
+<style>
+  :root {
+    --bg: #0F0E17;
+    --bg2: #161423;
+    --surface: #1E1B32;
+    --surf2: #252240;
+    --violet: #5B21B6;
+    --vlt: #7C3AED;
+    --vlt-dim: rgba(124,58,237,0.18);
+    --coral: #F4574A;
+    --cor-dim: rgba(244,87,74,0.14);
+    --gold: #F5C518;
+    --gld-dim: rgba(245,197,24,0.13);
+    --green: #34D399;
+    --grn-dim: rgba(52,211,153,0.10);
+    --white: #F0EDF8;
+    --dim: rgba(240,237,248,0.48);
+    --dim2: rgba(240,237,248,0.22);
+    --border: rgba(240,237,248,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow: hidden;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+    z-index: 100;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 24px;
+    height: 52px;
+    gap: 12px;
+  }
+  .tb-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tb-icon {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--vlt) 0%, var(--coral) 100%);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .tb-icon svg { width: 16px; height: 16px; fill: #fff; }
+  .tb-wordmark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    color: var(--white);
+    white-space: nowrap;
+  }
+  .tb-session {
+    text-align: center;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--dim);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tb-counter {
+    text-align: right;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dim2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+  }
+  .tb-counter span { color: var(--white); }
+
+  /* ── ACCENT BAR ── */
+  .accent-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--vlt) 0%, var(--coral) 50%, var(--gold) 100%);
+  }
+
+  /* ── SLIDE DECK ── */
+  .deck {
+    position: fixed;
+    top: 52px;
+    bottom: 72px;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 40px 48px 32px;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.38s ease, transform 0.38s ease;
+    pointer-events: none;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: opacity 0.15s ease; transform: none !important; }
+  }
+
+  /* ── WATERMARK ── */
+  .watermark {
+    position: fixed;
+    bottom: 80px;
+    left: 24px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white);
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 10;
+    user-select: none;
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+  }
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--vlt), var(--coral));
+    transition: width 0.35s ease;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 52px;
+    gap: 16px;
+  }
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+    outline: none;
+  }
+  .nav-btn:hover { background: var(--surf2); border-color: rgba(124,58,237,0.4); }
+  .nav-btn:focus-visible { outline: 2px solid var(--vlt); outline-offset: 2px; }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transition: background 0.2s, transform 0.2s;
+    outline: none;
+  }
+  .dot:hover { background: var(--dim2); }
+  .dot.active { background: var(--vlt); transform: scale(1.25); }
+  .dot:focus-visible { outline: 2px solid var(--vlt); outline-offset: 2px; }
+
+  /* ── SHARED SLIDE ELEMENTS ── */
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--vlt);
+    margin-bottom: 10px;
+  }
+  .eyebrow.coral { color: var(--coral); }
+  .eyebrow.gold { color: var(--gold); }
+  .eyebrow.green { color: var(--green); }
+
+  .slide-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(26px, 3.5vw, 40px);
+    line-height: 1.15;
+    color: var(--white);
+    text-wrap: balance;
+    margin-bottom: 12px;
+  }
+  .slide-title .hl-vlt { color: var(--vlt); }
+  .slide-title .hl-coral { color: var(--coral); }
+  .slide-title .hl-gold { color: var(--gold); }
+  .slide-title .hl-green { color: var(--green); }
+
+  .slide-sub {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--dim);
+    max-width: 640px;
+    line-height: 1.65;
+    margin-bottom: 28px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── COVER PILLS ── */
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .pill {
+    font-size: 11.5px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--dim);
+    background: var(--surface);
+    letter-spacing: 0.02em;
+  }
+  .pill.vlt { border-color: rgba(124,58,237,0.4); color: var(--vlt); background: var(--vlt-dim); }
+  .pill.co  { border-color: rgba(244,87,74,0.35); color: var(--coral); background: var(--cor-dim); }
+  .pill.go  { border-color: rgba(245,197,24,0.35); color: var(--gold); background: var(--gld-dim); }
+  .pill.grn { border-color: rgba(52,211,153,0.3); color: var(--green); background: var(--grn-dim); }
+
+  /* ── COVER SESSION BADGE ── */
+  .session-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dim2);
+    margin-bottom: 20px;
+  }
+  .session-badge::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--vlt), var(--coral));
+    border-radius: 2px;
+  }
+
+  /* ── AGENDA LIST ── */
+  .agenda-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 680px;
+  }
+  .agenda-item {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .agenda-item:last-child { border-bottom: none; }
+  .agenda-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--vlt);
+    padding-top: 1px;
+    font-variant-numeric: tabular-nums;
+  }
+  .agenda-text {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--white);
+    line-height: 1.5;
+  }
+  .agenda-text strong {
+    font-weight: 600;
+    color: var(--white);
+  }
+  .agenda-text span {
+    color: var(--dim);
+    font-size: 13.5px;
+  }
+
+  /* ── CONCEPT CARDS ── */
+  .cards-grid {
+    display: grid;
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .cards-2col { grid-template-columns: repeat(2, 1fr); }
+  .cards-3col { grid-template-columns: repeat(3, 1fr); }
+  .cards-4col { grid-template-columns: repeat(4, 1fr); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card.vl { border-left: 3px solid var(--vlt); }
+  .card.co { border-left: 3px solid var(--coral); }
+  .card.go { border-left: 3px solid var(--gold); }
+  .card.gr { border-left: 3px solid var(--green); }
+  .card.pu { border-left: 3px solid #A78BFA; }
+
+  .card-icon { font-size: 20px; line-height: 1; }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--white);
+  }
+  .card-body {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--dim);
+    line-height: 1.6;
+  }
+
+  /* ── ANALOGY BOX ── */
+  .analogy {
+    background: var(--surf2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 13.5px;
+    color: var(--dim);
+    line-height: 1.65;
+    margin-top: 16px;
+    max-width: 720px;
+  }
+
+  /* ── VS LAYOUT ── */
+  .vs-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    align-items: start;
+    margin-top: 8px;
+  }
+  .vs-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .vs-panel.left { border-top: 3px solid var(--vlt); }
+  .vs-panel.right { border-top: 3px solid var(--coral); }
+  .vs-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 14px;
+    text-wrap: balance;
+  }
+  .vs-label.vlt { color: var(--vlt); }
+  .vs-label.coral { color: var(--coral); }
+  .vs-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .vs-list li {
+    font-size: 13.5px;
+    color: var(--dim);
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .vs-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--dim2);
+    font-size: 12px;
+  }
+  .vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    align-self: center;
+  }
+  .vs-badge {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--dim2);
+    background: var(--surf2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── TWO-COL STEP LAYOUT ── */
+  .step-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .step-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .step-panel.do { border-top: 3px solid var(--green); }
+  .step-panel.avoid { border-top: 3px solid var(--coral); }
+  .step-heading {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .step-heading.do { color: var(--green); }
+  .step-heading.avoid { color: var(--coral); }
+  .step-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .step-list li {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.55;
+    padding-left: 20px;
+    position: relative;
+  }
+  .step-list li::before {
+    position: absolute;
+    left: 0;
+    font-size: 12px;
+  }
+  .step-panel.do .step-list li::before { content: '✓'; color: var(--green); }
+  .step-panel.avoid .step-list li::before { content: '✕'; color: var(--coral); }
+  .step-list strong { font-weight: 600; color: var(--white); }
+
+  /* ── ACTIVITY BOX ── */
+  .activity-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-top: 8px;
+    max-width: 700px;
+  }
+  .activity-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--gld-dim);
+    border: 1px solid rgba(245,197,24,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    margin-bottom: 14px;
+  }
+  .activity-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--white);
+    margin-bottom: 14px;
+  }
+  .activity-steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .activity-steps li {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--dim);
+    line-height: 1.55;
+    align-items: start;
+  }
+  .activity-steps li .step-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--gold);
+    padding-top: 1px;
+    font-variant-numeric: tabular-nums;
+  }
+  .activity-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .activity-tag {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--dim2);
+    background: var(--surf2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 11px;
+  }
+
+  /* ── KEY TAKEAWAY ── */
+  .quote-block {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 32px 36px;
+    margin-top: 8px;
+    position: relative;
+    max-width: 720px;
+  }
+  .quote-mark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 60px;
+    line-height: 0.8;
+    color: var(--vlt);
+    opacity: 0.35;
+    position: absolute;
+    top: 20px;
+    left: 28px;
+    user-select: none;
+  }
+  .quote-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: clamp(18px, 2.5vw, 26px);
+    color: var(--white);
+    line-height: 1.35;
+    margin-bottom: 12px;
+    padding-top: 16px;
+    text-wrap: balance;
+  }
+  .quote-attr {
+    font-size: 12.5px;
+    color: var(--dim2);
+    font-weight: 400;
+  }
+  .qtags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .qtag {
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--dim);
+  }
+  .qtag.vlt { background: var(--vlt-dim); color: #C4B5FD; border-color: rgba(124,58,237,0.3); }
+  .qtag.co  { background: var(--cor-dim); color: #FCA5A5; border-color: rgba(244,87,74,0.3); }
+  .qtag.go  { background: var(--gld-dim); color: var(--gold); border-color: rgba(245,197,24,0.3); }
+  .qtag.grn { background: var(--grn-dim); color: var(--green); border-color: rgba(52,211,153,0.25); }
+
+  /* ── NEXT CARD ── */
+  .next-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--surface);
+    border: 1px solid rgba(124,58,237,0.35);
+    border-radius: 12px;
+    padding: 20px 24px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+    max-width: 560px;
+    margin-top: 8px;
+  }
+  .next-card:hover { background: var(--surf2); border-color: rgba(124,58,237,0.6); }
+  .next-card:focus-visible { outline: 2px solid var(--vlt); outline-offset: 2px; }
+  .nc-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--vlt-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .nc-icon svg { width: 20px; height: 20px; fill: var(--vlt); }
+  .nc-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--vlt);
+    margin-bottom: 2px;
+  }
+  .nc-session {
+    font-size: 11.5px;
+    color: var(--dim2);
+    margin-bottom: 3px;
+  }
+  .nc-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .nc-desc {
+    font-size: 12.5px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+  .nc-arrow {
+    margin-left: auto;
+    flex-shrink: 0;
+    color: var(--dim2);
+  }
+  .nc-arrow svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── RECAP + CONTACT ── */
+  .recap-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .recap-chip {
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--dim);
+  }
+  .recap-chip.vlt { background: var(--vlt-dim); color: #C4B5FD; border-color: rgba(124,58,237,0.3); }
+  .recap-chip.co  { background: var(--cor-dim); color: #FCA5A5; border-color: rgba(244,87,74,0.3); }
+  .recap-chip.go  { background: var(--gld-dim); color: var(--gold); border-color: rgba(245,197,24,0.3); }
+  .recap-chip.sf2 { background: var(--surf2); }
+
+  .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dim);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    transition: background 0.18s, border-color 0.18s, color 0.18s;
+  }
+  .contact-link:hover { background: var(--surf2); color: var(--white); }
+  .contact-link:focus-visible { outline: 2px solid var(--vlt); outline-offset: 2px; }
+  .contact-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 24px 20px 24px; }
+    .topbar-inner { padding: 0 16px; }
+    .nav-inner { padding: 0 16px; }
+    .tb-wordmark { font-size: 12px; }
+    .tb-session { font-size: 10px; }
+    .cards-2col,
+    .cards-3col,
+    .cards-4col { grid-template-columns: 1fr; }
+    .vs-grid { grid-template-columns: 1fr; }
+    .vs-divider { padding: 8px 0; }
+    .step-grid { grid-template-columns: 1fr; }
+    .slide-title { font-size: 22px; }
+    .dots { display: none; }
+    .activity-box { padding: 18px 18px; }
+  }
+
+  @media (max-width: 900px) {
+    .cards-3col { grid-template-columns: repeat(2, 1fr); }
+    .cards-4col { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  #pdf-btn { display: none !important; }
+}
+
+/* ── Shared session nav bar ── */
+.sn-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0d9f5;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 2px 8px rgba(91,33,182,0.07);
+  min-height: 48px;
+}
+.sn-bar a, .sn-bar button {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 7px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.sn-back { background: #f0eef9; color: #5B21B6; }
+.sn-back:hover { background: #e0d9f5; }
+.sn-prev, .sn-next { background: #f0eef9; color: #5B21B6; }
+.sn-prev:hover, .sn-next:hover { background: #e0d9f5; }
+.sn-prev[disabled], .sn-next[disabled] { opacity: .35; pointer-events: none; }
+.sn-title { flex: 1; font-size: .88rem; font-weight: 600; color: #1a1830; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sn-download { background: #5B21B6; color: #fff; }
+.sn-download:hover { background: #7C3AED; }
+.sn-theme { background: #f0eef9; color: #5B21B6; font-size: 1rem; padding: 5px 10px; }
+.sn-theme:hover { background: #e0d9f5; }
+/* push deck content below nav bar */
+body > .deck, body > div.deck { padding-top: 48px; }
+/* light theme override */
+[data-theme="light"] .sn-bar { background: #fff; border-color: #e0d9f5; }
+[data-theme="dark"]  .sn-bar { background: #1A1830; border-color: #2E2A4A; }
+[data-theme="dark"]  .sn-title { color: #EDECF4; }
+[data-theme="dark"]  .sn-back, [data-theme="dark"] .sn-prev, [data-theme="dark"] .sn-next, [data-theme="dark"] .sn-theme { background: #2E2A4A; color: #a78bfa; }
+
+/* ── Light theme tokens ── */
+[data-theme="light"] {
+  --bg: #FAFAF8 !important;
+  --bg2: #F0EEF9 !important;
+  --surface: #fff !important;
+  --surf2: #F0EEF9 !important;
+  --white: #0F0E17 !important;
+  --dim: rgba(15,14,23,0.55) !important;
+  --dim2: rgba(15,14,23,0.35) !important;
+  --border: rgba(91,33,182,0.12) !important;
+}
+[data-theme="light"] html, [data-theme="light"] body,
+html[data-theme="light"], body[data-theme="light"] {
+  background: #FAFAF8 !important;
+  color: #0F0E17 !important;
+}
+[data-theme="light"] .slide,
+[data-theme="light"] .slide * { color: inherit; }
+
+/* ── Print CSS (clean PDF) ── */
+@media print {
+  .sn-bar { display: none !important; }
+  body { padding-top: 0 !important; }
+  body > .deck { padding-top: 0 !important; }
+  .botnav, #nav, .nav-row, [id="prev"], [id="next"], #dots, .dot, .prog, .topbar, .tb-count { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; overflow: visible !important; height: auto !important; }
+  .slide { display: none !important; page-break-after: always; break-after: page; position: relative !important; height: 100vh !important; opacity: 1 !important; transform: none !important; }
+  .slide.active { display: flex !important; background: #fff !important; }
+  .stage { overflow: visible !important; height: auto !important; }
+  .deck { height: auto !important; overflow: visible !important; padding-top: 0 !important; }
+}
+</style>
+</head>
+<body>
+<!-- ── Session Nav Bar ── -->
+<div class="sn-bar" id="snBar">
+  <a class="sn-back" href="../site/sessions.html">← Sessions</a>
+  <a class="sn-prev" href="session_02.html?n=2">‹ S02</a>
+  <span class="sn-title">S03 · Empathy Mapping</span>
+  <a class="sn-next" href="session_04.html?n=4">S04 ›</a>
+  <button class="sn-download sn-bar" onclick="window.print()">⬇ PDF</button>
+  <button class="sn-theme" id="snTheme" title="Toggle theme">🌙</button>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('snTheme');
+  var root = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('dk-session-theme'); } catch(e){}
+  // default to light
+  if (!saved) saved = 'light';
+  root.setAttribute('data-theme', saved);
+  btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+  btn.addEventListener('click', function(){
+    var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('dk-session-theme', t); } catch(e){}
+  });
+})();
+</script>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="accent-bar"></div>
+  <div class="topbar-inner">
+    <div class="tb-brand">
+      <div class="tb-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="tb-wordmark">Designer_Kid Studios</span>
+    </div>
+    <div class="tb-session">Session 03 · Week 1, Day 3 · Users &amp; UX Research</div>
+    <div class="tb-counter"><span id="cur-slide">1</span> / 10</div>
+  </div>
+</div>
+
+<!-- WATERMARK TEMPLATE -->
+<template id="wm-tpl">
+  <div class="watermark">Designer_Kid</div>
+</template>
+
+<!-- SLIDE DECK -->
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1 — COVER -->
+  <div class="slide active" data-index="0">
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:740px;">
+      <div class="session-badge">Session 03 · Week 1, Day 3 · 1 Hour</div>
+      <h1 class="slide-title">Users &amp; <span class="hl-vlt">UX Research</span></h1>
+      <p class="slide-sub">You can't design for someone you don't understand. Today we learn how to find out exactly who your user is — and what they really need.</p>
+      <div class="pill-row">
+        <span class="pill vlt">Who is the user</span>
+        <span class="pill">1 Hour Session</span>
+        <span class="pill go">Research Methods</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2 — AGENDA -->
+  <div class="slide" data-index="1">
+    <div class="eyebrow">Today's Agenda</div>
+    <h2 class="slide-title">What we're covering</h2>
+    <div class="agenda-list">
+      <div class="agenda-item">
+        <span class="agenda-num">01</span>
+        <div class="agenda-text"><strong>Who is the user?</strong> <span>— not "everyone", a specific real person</span></div>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-num">02</span>
+        <div class="agenda-text"><strong>User needs vs user wants</strong> <span>— why the difference matters in design</span></div>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-num">03</span>
+        <div class="agenda-text"><strong>Research methods</strong> <span>— 4 ways to understand your users</span></div>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-num">04</span>
+        <div class="agenda-text"><strong>How to run a user interview</strong> <span>— dos and don'ts</span></div>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-num">05</span>
+        <div class="agenda-text"><strong>User pain points</strong> <span>— how to spot and document them</span></div>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-num">06</span>
+        <div class="agenda-text"><strong>Activity:</strong> <span>Research a selected app or product</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 — WHO IS THE USER -->
+  <div class="slide" data-index="2">
+    <div class="eyebrow">Concept 01</div>
+    <h2 class="slide-title">Who is the user?</h2>
+    <div class="cards-grid cards-2col">
+      <div class="card vl">
+        <div class="card-icon">🎯</div>
+        <div class="card-title">Not "Everyone"</div>
+        <div class="card-body">"Everyone" is not a user. A 22-year-old student ordering food is a user. The more specific you get, the better you can design.</div>
+      </div>
+      <div class="card vl">
+        <div class="card-icon">👤</div>
+        <div class="card-title">A Real Person</div>
+        <div class="card-body">Your user has a name, an age, a job, daily habits, frustrations, and goals. Design for that person — not an imaginary average.</div>
+      </div>
+      <div class="card vl">
+        <div class="card-icon">🧩</div>
+        <div class="card-title">Has Specific Goals</div>
+        <div class="card-body">Every user opens your app with a purpose. Find out what that purpose is. That's what your design must serve.</div>
+      </div>
+      <div class="card vl">
+        <div class="card-icon">🌍</div>
+        <div class="card-title">Lives in a Context</div>
+        <div class="card-body">Where are they? On a crowded bus? In a hurry? Using a cheap phone? Context completely changes how design should work.</div>
+      </div>
+    </div>
+    <div class="analogy">💡 Designing for "everyone" is like cooking a meal for "anyone". You end up with something that satisfies nobody. Pick your user. Design for them.</div>
+  </div>
+
+  <!-- SLIDE 4 — NEEDS VS WANTS -->
+  <div class="slide" data-index="3">
+    <div class="eyebrow">Concept 02</div>
+    <h2 class="slide-title">Needs vs Wants</h2>
+    <div class="vs-grid">
+      <div class="vs-panel left">
+        <div class="vs-label vlt">What users SAY they want</div>
+        <ul class="vs-list">
+          <li>"Make it faster"</li>
+          <li>"Add more features"</li>
+          <li>"Make it look better"</li>
+          <li>"Give me more options"</li>
+        </ul>
+      </div>
+      <div class="vs-divider">
+        <div class="vs-badge">VS</div>
+      </div>
+      <div class="vs-panel right">
+        <div class="vs-label coral">What users actually NEED</div>
+        <ul class="vs-list">
+          <li>"Stop making me repeat steps"</li>
+          <li>"Help me finish this one task easily"</li>
+          <li>"Make the important thing obvious"</li>
+          <li>"Remove the things I never use"</li>
+        </ul>
+      </div>
+    </div>
+    <div class="analogy">💡 Users describe symptoms, not diagnoses. "Make it faster" usually means "reduce the number of steps". Your job is to find the real need underneath the stated want.</div>
+  </div>
+
+  <!-- SLIDE 5 — RESEARCH METHODS -->
+  <div class="slide" data-index="4">
+    <div class="eyebrow">Concept 03</div>
+    <h2 class="slide-title">Research Methods</h2>
+    <div class="cards-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card vl">
+        <div class="card-icon">🗣️</div>
+        <div class="card-title">User Interviews</div>
+        <div class="card-body">Talk to 5–8 real users. Ask open-ended questions. Listen more than you speak. "Tell me about the last time you..." is better than "Do you like...?"</div>
+      </div>
+      <div class="card co">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Surveys</div>
+        <div class="card-body">Useful for gathering quick opinions from many people. Keep it under 10 questions. Good for confirming things — not for discovering new insights.</div>
+      </div>
+      <div class="card go">
+        <div class="card-icon">👁️</div>
+        <div class="card-title">Observation</div>
+        <div class="card-body">Watch people actually use a product. Don't ask — observe. What confuses them? Where do they pause? Where do they tap the wrong thing?</div>
+      </div>
+      <div class="card gr">
+        <div class="card-icon">🔍</div>
+        <div class="card-title">Competitor Research</div>
+        <div class="card-body">Study apps that solve the same problem. What do they do well? What do users complain about in reviews? App Store reviews = free user research.</div>
+      </div>
+      <div class="card vl">
+        <div class="card-icon">🗒️</div>
+        <div class="card-title">Secondary Research</div>
+        <div class="card-body">Read existing studies, blog posts and reports about your target users. Someone has already researched your user group — find that research.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6 — USER INTERVIEW -->
+  <div class="slide" data-index="5">
+    <div class="eyebrow">Concept 04</div>
+    <h2 class="slide-title">How to Run a User Interview</h2>
+    <div class="step-grid">
+      <div class="step-panel do">
+        <div class="step-heading do">Do this</div>
+        <ul class="step-list">
+          <li><strong>Ask open-ended questions</strong> — "Tell me about your experience with..." not "Is this good?"</li>
+          <li><strong>Let them talk</strong> — silence is okay. Don't rush to fill it.</li>
+          <li><strong>Ask why, then ask why again</strong> — go deeper than the first answer</li>
+          <li><strong>Take notes or record</strong> (with permission)</li>
+          <li><strong>Watch their body language</strong> — frustration shows before words do</li>
+        </ul>
+      </div>
+      <div class="step-panel avoid">
+        <div class="step-heading avoid">Avoid this</div>
+        <ul class="step-list">
+          <li><strong>Leading questions</strong> — "Don't you think this button is confusing?" plants the answer</li>
+          <li><strong>Showing your design too early</strong> — let them describe the problem first</li>
+          <li><strong>Asking about the future</strong> — "Would you use this?" People are bad at predicting their own behaviour</li>
+          <li><strong>Defending your design</strong> — they're not criticising you, they're giving you data</li>
+          <li><strong>Interviewing only friends</strong> — friends are polite. You need honest strangers.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7 — PAIN POINTS -->
+  <div class="slide" data-index="6">
+    <div class="eyebrow">Concept 05</div>
+    <h2 class="slide-title">Identifying User Pain Points</h2>
+    <p class="slide-sub" style="margin-bottom:16px;">A pain point is any moment in a user's experience that causes frustration, confusion, or extra effort. Finding them is your biggest job as a UX designer.</p>
+    <div class="cards-grid cards-2col">
+      <div class="card co">
+        <div class="card-icon">😤</div>
+        <div class="card-title">Friction Points</div>
+        <div class="card-body">Steps that take too long, are confusing, or require too much effort. Example: a 6-step checkout when 2 would do.</div>
+      </div>
+      <div class="card vl">
+        <div class="card-icon">🤷</div>
+        <div class="card-title">Confusion Points</div>
+        <div class="card-body">Moments where users don't know what to do next. Example: a form that gives no feedback when you make an error.</div>
+      </div>
+      <div class="card go">
+        <div class="card-icon">⏱️</div>
+        <div class="card-title">Wait Points</div>
+        <div class="card-body">Moments where users are forced to wait with no feedback. Example: a loading screen with no progress indicator.</div>
+      </div>
+      <div class="card pu">
+        <div class="card-icon">🚫</div>
+        <div class="card-title">Dead Ends</div>
+        <div class="card-body">When users get stuck with no way forward. Example: an error message that says "Something went wrong" with no action to take.</div>
+      </div>
+    </div>
+    <div class="analogy">🎯 You find pain points by watching users struggle — not by asking them what's wrong. "I'm fine" means nothing. "They clicked the wrong button three times" tells you everything.</div>
+  </div>
+
+  <!-- SLIDE 8 — ACTIVITY -->
+  <div class="slide" data-index="7">
+    <div class="eyebrow gold">Activity</div>
+    <h2 class="slide-title">Research a Real App</h2>
+    <p class="slide-sub">Pick any app you use daily. Become a researcher for 20 minutes.</p>
+    <div class="activity-box">
+      <div class="activity-label">⚡ App Research Challenge</div>
+      <div class="activity-title">App Research Challenge</div>
+      <ol class="activity-steps">
+        <li><span class="step-num">1</span><span>Pick one app — something you use often (food delivery, banking, notes, transport)</span></li>
+        <li><span class="step-num">2</span><span>Identify who the main user is — be specific: age, situation, goal</span></li>
+        <li><span class="step-num">3</span><span>Try to complete 2 tasks in the app. Write down every moment of friction</span></li>
+        <li><span class="step-num">4</span><span>Check the App Store reviews — what do real users complain about most?</span></li>
+        <li><span class="step-num">5</span><span>Write 3 pain points you found + suggest what the fix might be</span></li>
+      </ol>
+      <div class="activity-meta">
+        <span class="activity-tag">20 min research</span>
+        <span class="activity-tag">10 min share</span>
+        <span class="activity-tag">10 min Q&amp;A</span>
+        <span class="activity-tag">No Figma needed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9 — KEY TAKEAWAY -->
+  <div class="slide" data-index="8">
+    <div class="eyebrow">Key Takeaway</div>
+    <h2 class="slide-title">The mindset shift</h2>
+    <div class="quote-block">
+      <div class="quote-mark">"</div>
+      <div class="quote-text">You are not your user. Go find out who they really are.</div>
+      <div class="quote-attr">The most important mindset shift in UX design.</div>
+    </div>
+    <div class="qtags">
+      <span class="qtag vlt">Users ≠ everyone — be specific</span>
+      <span class="qtag co">Needs ≠ wants — dig deeper</span>
+      <span class="qtag go">Research before designing</span>
+      <span class="qtag grn">Pain points = design opportunities</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 10 — UP NEXT + CONTACT -->
+  <div class="slide" data-index="9">
+    <div class="eyebrow green">Session 03 Complete</div>
+    <h2 class="slide-title">Great research = great design 🔍</h2>
+    <p class="slide-sub">You now know how to find and understand your users. Next session we turn that research into a persona — a character card that represents your user.</p>
+
+    <a class="next-card" href="session_04.html" target="_blank" rel="noopener">
+      <div class="nc-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div>
+        <div class="nc-label">Next Session</div>
+        <div class="nc-session">Session 04 · Week 1, Day 4</div>
+        <div class="nc-title">Persona &amp; User Flow</div>
+        <div class="nc-desc">Turn your research into a persona — a detailed profile of your target user. Then map exactly how they'll move through your product.</div>
+      </div>
+      <div class="nc-arrow">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </a>
+
+    <div class="recap-chips">
+      <span class="recap-chip vlt">✓ Users are specific people</span>
+      <span class="recap-chip co">✓ Research before designing</span>
+      <span class="recap-chip go">✓ 4 research methods learned</span>
+      <span class="recap-chip sf2">✓ Pain points identified</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="contact-row">
+      <a class="contact-link" href="https://wa.me/919686959787" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path fill="#25D366" d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.85L0 24l6.334-1.506A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.893 0-3.671-.502-5.21-1.381l-.374-.217-3.753.892.945-3.652-.237-.393A9.94 9.94 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+        </svg>
+        +91 96869 59787
+      </a>
+      <a class="contact-link" href="http://linkedin.com/in/harikrishnam-raju/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24">
+          <path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+        harikrishnam-raju
+      </a>
+      <a class="contact-link" href="https://www.behance.net/rajuvegeshana" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24">
+          <path fill="#1769FF" d="M6.938 4.503c.702 0 1.34.06 1.92.188.577.13 1.07.33 1.485.61.41.28.733.65.96 1.12.225.47.34 1.05.34 1.73 0 .74-.17 1.36-.507 1.86-.338.5-.837.9-1.502 1.22.906.26 1.576.72 2.022 1.37.448.66.665 1.45.665 2.36 0 .75-.13 1.39-.41 1.93-.28.55-.67 1-.155 1.35-.516.36-1.09.61-1.73.76-.645.15-1.32.22-2.028.22H0V4.503h6.938zm-.34 4.906c.596 0 1.07-.14 1.42-.43.35-.29.524-.73.524-1.33 0-.33-.06-.606-.18-.826-.12-.22-.29-.39-.5-.51-.21-.12-.45-.2-.72-.245-.27-.04-.555-.06-.858-.06H2.66v3.4h3.938zm.156 5.123c.347 0 .67-.03.97-.1.3-.07.563-.18.79-.34.226-.16.403-.376.528-.65.125-.27.19-.617.19-1.03 0-.82-.225-1.4-.674-1.74-.45-.34-1.047-.51-1.79-.51H2.66v4.37h4.094zM19.585 4h4.5v1.56h-4.5V4zm-.65 4.503c-.496-.5-1.21-.75-2.14-.75-.6 0-1.1.1-1.5.31-.4.21-.73.47-.98.79-.25.32-.43.67-.54 1.05-.11.38-.17.76-.18 1.14h5.77c-.04-.73-.23-1.28-.43-1.54zm.13 7.97c.44-.43.67-1.05.67-1.87H14.27c0 .88.25 1.56.75 2.04.5.48 1.13.72 1.9.72.83 0 1.49-.22 1.97-.63.48-.4.79-.85.93-1.35h-1.95c-.08.29-.2.52-.41.72-.21.2-.5.3-.86.3-.45 0-.8-.14-1.05-.42-.25-.27-.4-.67-.4-1.21h5.36c.01-.13.02-.26.02-.39 0-1.28-.33-2.24-1-2.87z"/>
+        </svg>
+        rajuvegeshana
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress" style="width:10%"></div>
+  </div>
+  <div class="nav-inner">
+    <button class="nav-btn" id="btn-prev" disabled>
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Prev
+    </button>
+    <div class="dots" id="dots" role="tablist" aria-label="Slides"></div>
+    <button class="nav-btn" id="btn-next">
+      Next
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const TOTAL = 10;
+    let current = 0;
+
+    const slides = document.querySelectorAll('.slide');
+    const dotsEl = document.getElementById('dots');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const progressEl = document.getElementById('progress');
+    const curSlideEl = document.getElementById('cur-slide');
+
+    // inject watermarks
+    const wm = document.getElementById('wm-tpl').content;
+    slides.forEach(() => {
+      document.body.appendChild(wm.cloneNode(true));
+    });
+    // actually we use one fixed watermark — already in template insertion above
+    // remove extra ones if any
+    const wmarks = document.querySelectorAll('.watermark');
+    wmarks.forEach((w, i) => { if (i > 0) w.remove(); });
+
+    // build dots
+    for (let i = 0; i < TOTAL; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-label', 'Slide ' + (i + 1));
+      btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+      btn.addEventListener('click', () => goTo(i));
+      dotsEl.appendChild(btn);
+    }
+
+    function updateUI() {
+      slides.forEach((s, i) => {
+        s.classList.remove('active', 'exit-left');
+        if (i < current) s.classList.add('exit-left');
+        else if (i === current) s.classList.add('active');
+      });
+      dotsEl.querySelectorAll('.dot').forEach((d, i) => {
+        d.classList.toggle('active', i === current);
+        d.setAttribute('aria-selected', i === current ? 'true' : 'false');
+      });
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === TOTAL - 1;
+      curSlideEl.textContent = current + 1;
+      progressEl.style.width = ((current + 1) / TOTAL * 100) + '%';
+    }
+
+    function goTo(idx) {
+      if (idx < 0 || idx >= TOTAL) return;
+      current = idx;
+      updateUI();
+    }
+
+    btnPrev.addEventListener('click', () => goTo(current - 1));
+    btnNext.addEventListener('click', () => goTo(current + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(current + 1); }
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); goTo(current - 1); }
+    });
+
+    updateUI();
+  })();
+
+  // PDF download button
+  (function(){
+    var btn = document.createElement('button');
+    btn.id = 'pdf-btn';
+    btn.textContent = '⬇ Save PDF';
+    btn.setAttribute('title', 'Print / Save as PDF');
+    btn.style.cssText = 'position:fixed;bottom:18px;right:18px;z-index:9999;padding:8px 16px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    btn.addEventListener('click', function(){ window.print(); });
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
+    // fallback if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') document.body.appendChild(btn);
+  })();
+</script>
+</body>
+</html>

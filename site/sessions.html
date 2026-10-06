@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>All Sessions — Designer_Kid Studios</title>
+<meta name="description" content="Browse all 20 interactive slide deck sessions for the Designer_Kid Studios 4-week UI/UX course.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<style>
+.sessions-full{padding:60px 0 80px}
+.week-divider{grid-column:1/-1;display:flex;align-items:center;gap:16px;margin:20px 0 8px}
+.week-divider:first-child{margin-top:0}
+.week-divider span{font-family:var(--ff-h);font-size:.8rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--violet-lt);white-space:nowrap}
+.week-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+#sessionsGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.session-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-decoration:none;color:inherit;transition:border-color .15s,box-shadow .15s;cursor:pointer}
+.session-card:hover{border-color:var(--violet-lt);box-shadow:0 4px 20px rgba(91,33,182,.1)}
+.sc-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sc-num{font-family:var(--ff-h);font-size:1.4rem;font-weight:800;color:var(--violet-lt);line-height:1}
+.sc-week{font-size:.72rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.sc-title{font-family:var(--ff-h);font-size:1rem;font-weight:700;line-height:1.25;margin-bottom:6px}
+.sc-topics{font-size:.82rem;color:var(--muted);line-height:1.5;margin-bottom:14px}
+.sc-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:12px}
+.sc-slides-count{font-size:.78rem;color:var(--muted)}
+.sc-btn{font-size:.78rem;font-weight:600;color:var(--violet-lt)}
+</style>
+</head>
+<body>
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="#FAFAF8"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#F4574A" opacity=".85"/><rect x="3" y="13" width="8" height="8" rx="2" fill="#F5C518" opacity=".85"/><rect x="13" y="13" width="8" height="8" rx="2" fill="#FAFAF8" opacity=".3"/></svg>
+      </div>
+      <span class="nav-wordmark">Designer<em>_Kid</em></span>
+    </a>
+    <div class="nav-links">
+      <a href="curriculum.html">Curriculum</a>
+      <a href="resources.html">Resources</a>
+      <a href="sessions.html" style="color:var(--ink)">Sessions</a>
+      <a href="index.html#contact" class="nav-cta">Get In Touch</a>
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="drawer" id="drawer">
+  <a href="curriculum.html">Curriculum</a>
+  <a href="resources.html">Resources</a>
+  <a href="sessions.html">Sessions</a>
+  <a href="index.html#contact">Get In Touch</a>
+</div>
+
+<div style="height:var(--nav-h)"></div>
+
+<div class="page-hero">
+  <div class="container">
+    <div class="eyebrow">Course Sessions</div>
+    <h1>All 20 sessions, open now.</h1>
+    <p>Interactive slide decks — runs in any browser, no install needed. Use arrow keys or click to navigate. Everything stays available after the course ends.</p>
+  </div>
+</div>
+
+<section class="sessions-full">
+  <div class="container">
+    <div id="sessionsGrid"></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="nav-wordmark" style="font-size:18px">Designer<em>_Kid</em> <span style="font-family:'DM Sans',sans-serif;font-weight:300;font-size:14px;color:var(--muted)">Studios</span></div>
+        <p>4-Week UI/UX Beginner Course<br>Bengaluru · India</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <div class="footer-col-title">Course</div>
+          <a href="curriculum.html">Curriculum</a>
+          <a href="sessions.html">All Sessions</a>
+          <a href="resources.html">Resources</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Connect</div>
+          <a href="https://wa.me/919686959787" target="_blank">WhatsApp</a>
+          <a href="http://linkedin.com/in/harikrishnam-raju/" target="_blank">LinkedIn</a>
+          <a href="https://www.behance.net/rajuvegeshana" target="_blank">Behance</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 Designer_Kid Studios · Harikrishnam Raju · All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="js/site.js"></script>
+</body>
+</html>

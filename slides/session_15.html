@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 15 — Mobile-First Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0F0E17;--surface:#1E1B32;--surf2:#252240;
+  --violet:#5B21B6;--vlt:#7C3AED;--vlt-dim:rgba(124,58,237,.18);
+  --coral:#F4574A;--cor-dim:rgba(244,87,74,.14);
+  --gold:#F5C518;--gld-dim:rgba(245,197,24,.13);
+  --green:#34D399;--grn-dim:rgba(52,211,153,.10);
+  --white:#F0EDF8;--dim:rgba(240,237,248,.48);
+  --border:rgba(240,237,248,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;height:100vh;overflow:hidden}
+.topbar{position:fixed;top:0;left:0;width:0%;height:3px;background:linear-gradient(90deg,var(--vlt),var(--coral));transition:width .3s;z-index:100}
+.stage{width:100vw;height:100vh;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 80px;opacity:0;transform:translateX(60px);transition:opacity .45s,transform .45s;pointer-events:none}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:auto}
+.slide.exit{opacity:0;transform:translateX(-60px)}
+.eyebrow{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--vlt);margin-bottom:14px}
+.slide-title{font-family:'Syne',sans-serif;font-size:2.6rem;font-weight:800;line-height:1.15;text-align:center;margin-bottom:16px}
+.slide-sub{font-size:1.05rem;color:var(--dim);text-align:center;max-width:620px;line-height:1.7}
+.hl{color:var(--vlt)}
+.hl-c{color:var(--coral)}
+.hl-g{color:var(--gold)}
+.hl-gr{color:var(--green)}
+.cards{display:grid;gap:16px;width:100%;max-width:900px;margin-top:24px}
+.cards.c2{grid-template-columns:1fr 1fr}
+.cards.c3{grid-template-columns:1fr 1fr 1fr}
+.cards.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 20px}
+.card.vlt{border-top:3px solid var(--vlt)}
+.card.coral{border-top:3px solid var(--coral)}
+.card.gold{border-top:3px solid var(--gold)}
+.card.green{border-top:3px solid var(--green)}
+.card-icon{font-size:1.6rem;margin-bottom:10px}
+.card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:8px}
+.card-body{font-size:.85rem;color:var(--dim);line-height:1.6}
+.agenda-list{width:100%;max-width:700px;margin-top:24px}
+.ag-row{display:flex;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid var(--border)}
+.ag-num{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:800;color:var(--vlt);min-width:32px}
+.ag-title{font-size:.95rem;font-weight:600}
+.ag-sub{font-size:.8rem;color:var(--dim)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:100%;max-width:900px;margin-top:24px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 24px}
+.panel-label{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px}
+.check-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.check-list li{font-size:.88rem;color:var(--dim);line-height:1.5;padding-left:22px;position:relative}
+.check-list li::before{content:'→';position:absolute;left:0;color:var(--vlt);font-weight:700}
+.q-block{background:var(--surface);border-left:4px solid var(--vlt);border-radius:0 14px 14px 0;padding:32px 36px;max-width:720px;margin-top:24px;text-align:left}
+.q-mark{font-family:'Syne',sans-serif;font-size:4rem;font-weight:800;color:var(--vlt);line-height:1;margin-bottom:12px;opacity:.4}
+.q-text{font-size:1.15rem;font-weight:500;line-height:1.7;color:var(--white)}
+.q-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.qtag{background:var(--vlt-dim);color:var(--vlt);font-size:.75rem;font-weight:600;padding:5px 12px;border-radius:20px}
+.act-box{background:var(--surface);border:1px solid var(--gold);border-radius:16px;padding:32px 36px;max-width:760px;width:100%;margin-top:20px}
+.act-label{font-size:.7rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.act-steps{list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:10px}
+.act-steps li{counter-increment:step;font-size:.9rem;color:var(--dim);padding-left:28px;position:relative;line-height:1.5}
+.act-steps li::before{content:counter(step);position:absolute;left:0;color:var(--gold);font-weight:700;font-family:'Syne',sans-serif;font-size:.8rem}
+.act-meta{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+.act-meta span{font-size:.75rem;font-weight:600;padding:4px 12px;border-radius:20px;background:var(--gld-dim);color:var(--gold)}
+.next-card{background:var(--surface);border:1px solid var(--vlt);border-radius:16px;padding:28px 32px;max-width:500px;width:100%;margin-top:24px;text-align:center;text-decoration:none;display:block;transition:background .2s}
+.next-card:hover{background:var(--vlt-dim)}
+.next-label{font-size:.7rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--vlt);margin-bottom:8px}
+.next-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--white);margin-bottom:6px}
+.next-arrow{font-size:1.4rem;color:var(--vlt)}
+.contact-row{display:flex;gap:20px;justify-content:center;margin-top:28px}
+.contact-row a{display:flex;align-items:center;gap:8px;color:var(--dim);text-decoration:none;font-size:.85rem;font-weight:500;padding:8px 16px;border-radius:30px;border:1px solid var(--border);transition:border-color .2s,color .2s}
+.contact-row a:hover{border-color:var(--vlt);color:var(--white)}
+.contact-row svg{width:18px;height:18px;flex-shrink:0}
+.progress{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:90}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s}
+.dot.on{background:var(--vlt);transform:scale(1.3)}
+.nav{position:fixed;bottom:20px;right:32px;display:flex;gap:10px;z-index:90}
+.nav button{background:var(--surface);border:1px solid var(--border);color:var(--white);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1rem;transition:border-color .2s}
+.nav button:hover{border-color:var(--vlt)}
+.slide-counter{position:fixed;top:20px;right:28px;font-size:.75rem;color:var(--dim);font-weight:500;z-index:90}
+.wm{position:absolute;bottom:18px;left:22px;z-index:50;opacity:.18;pointer-events:none;font-family:'Syne',sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.08em;color:#F0EDF8}
+.vs-wrap{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch;width:100%;max-width:800px;margin-top:24px}
+.vs-badge{background:var(--vlt);color:var(--white);font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;align-self:center}
+
+  #pdf-btn { display: none !important; }
+}
+
+/* ── Shared session nav bar ── */
+.sn-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0d9f5;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 2px 8px rgba(91,33,182,0.07);
+  min-height: 48px;
+}
+.sn-bar a, .sn-bar button {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 7px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.sn-back { background: #f0eef9; color: #5B21B6; }
+.sn-back:hover { background: #e0d9f5; }
+.sn-prev, .sn-next { background: #f0eef9; color: #5B21B6; }
+.sn-prev:hover, .sn-next:hover { background: #e0d9f5; }
+.sn-prev[disabled], .sn-next[disabled] { opacity: .35; pointer-events: none; }
+.sn-title { flex: 1; font-size: .88rem; font-weight: 600; color: #1a1830; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sn-download { background: #5B21B6; color: #fff; }
+.sn-download:hover { background: #7C3AED; }
+.sn-theme { background: #f0eef9; color: #5B21B6; font-size: 1rem; padding: 5px 10px; }
+.sn-theme:hover { background: #e0d9f5; }
+/* push deck content below nav bar */
+body > .deck, body > div.deck { padding-top: 48px; }
+/* light theme override */
+[data-theme="light"] .sn-bar { background: #fff; border-color: #e0d9f5; }
+[data-theme="dark"]  .sn-bar { background: #1A1830; border-color: #2E2A4A; }
+[data-theme="dark"]  .sn-title { color: #EDECF4; }
+[data-theme="dark"]  .sn-back, [data-theme="dark"] .sn-prev, [data-theme="dark"] .sn-next, [data-theme="dark"] .sn-theme { background: #2E2A4A; color: #a78bfa; }
+
+/* ── Light theme tokens ── */
+[data-theme="light"] {
+  --bg: #FAFAF8 !important;
+  --bg2: #F0EEF9 !important;
+  --surface: #fff !important;
+  --surf2: #F0EEF9 !important;
+  --white: #0F0E17 !important;
+  --dim: rgba(15,14,23,0.55) !important;
+  --dim2: rgba(15,14,23,0.35) !important;
+  --border: rgba(91,33,182,0.12) !important;
+}
+[data-theme="light"] html, [data-theme="light"] body,
+html[data-theme="light"], body[data-theme="light"] {
+  background: #FAFAF8 !important;
+  color: #0F0E17 !important;
+}
+[data-theme="light"] .slide,
+[data-theme="light"] .slide * { color: inherit; }
+
+/* ── Print CSS (clean PDF) ── */
+@media print {
+  .sn-bar { display: none !important; }
+  body { padding-top: 0 !important; }
+  body > .deck { padding-top: 0 !important; }
+  .botnav, #nav, .nav-row, [id="prev"], [id="next"], #dots, .dot, .prog, .topbar, .tb-count { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; overflow: visible !important; height: auto !important; }
+  .slide { display: none !important; page-break-after: always; break-after: page; position: relative !important; height: 100vh !important; opacity: 1 !important; transform: none !important; }
+  .slide.active { display: flex !important; background: #fff !important; }
+  .stage { overflow: visible !important; height: auto !important; }
+  .deck { height: auto !important; overflow: visible !important; padding-top: 0 !important; }
+}
+</style>
+</head>
+<body>
+<!-- ── Session Nav Bar ── -->
+<div class="sn-bar" id="snBar">
+  <a class="sn-back" href="../site/sessions.html">← Sessions</a>
+  <a class="sn-prev" href="session_14.html?n=14">‹ S14</a>
+  <span class="sn-title">S15 · Mobile-First Design</span>
+  <a class="sn-next" href="session_16.html?n=16">S16 ›</a>
+  <button class="sn-download sn-bar" onclick="window.print()">⬇ PDF</button>
+  <button class="sn-theme" id="snTheme" title="Toggle theme">🌙</button>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('snTheme');
+  var root = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('dk-session-theme'); } catch(e){}
+  // default to light
+  if (!saved) saved = 'light';
+  root.setAttribute('data-theme', saved);
+  btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+  btn.addEventListener('click', function(){
+    var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('dk-session-theme', t); } catch(e){}
+  });
+})();
+</script>
+<div class="topbar" id="bar"></div>
+<template id="wm"><div class="wm">DESIGNER_KID</div></template>
+
+<div class="stage" id="stage">
+
+<!-- Slide 1: Cover -->
+<div class="slide active">
+  <div class="eyebrow">Week 3 · Session 15</div>
+  <div class="slide-title">Mobile-First<br><span class="hl">Design</span></div>
+  <div class="slide-sub">Designing for the smallest screen first — and why it makes your UI stronger everywhere.</div>
+  <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center">
+    <span style="background:var(--vlt-dim);color:var(--vlt);font-size:.78rem;font-weight:600;padding:5px 14px;border-radius:20px">Mobile-First</span>
+    <span style="background:var(--cor-dim);color:var(--coral);font-size:.78rem;font-weight:600;padding:5px 14px;border-radius:20px">Responsive</span>
+    <span style="background:var(--gld-dim);color:var(--gold);font-size:.78rem;font-weight:600;padding:5px 14px;border-radius:20px">Breakpoints</span>
+  </div>
+</div>
+
+<!-- Slide 2: Agenda -->
+<div class="slide">
+  <div class="eyebrow">Today's Plan</div>
+  <div class="slide-title" style="font-size:2rem">What We'll Cover</div>
+  <div class="agenda-list">
+    <div class="ag-row"><span class="ag-num">01</span><div><div class="ag-title">Why Mobile-First?</div><div class="ag-sub">Stats, behaviour, Google's stance</div></div></div>
+    <div class="ag-row"><span class="ag-num">02</span><div><div class="ag-title">Desktop-First vs Mobile-First</div><div class="ag-sub">How the two approaches differ</div></div></div>
+    <div class="ag-row"><span class="ag-num">03</span><div><div class="ag-title">Responsive Design Basics</div><div class="ag-sub">Breakpoints, fluid grids, flexible images</div></div></div>
+    <div class="ag-row"><span class="ag-num">04</span><div><div class="ag-title">Touch-Friendly UI Rules</div><div class="ag-sub">Tap targets, gestures, thumb zones</div></div></div>
+    <div class="ag-row"><span class="ag-num">05</span><div><div class="ag-title">Activity + Recap</div><div class="ag-sub">Redesign a desktop screen for mobile</div></div></div>
+  </div>
+</div>
+
+<!-- Slide 3: Why Mobile-First -->
+<div class="slide">
+  <div class="eyebrow">The Why</div>
+  <div class="slide-title">Why <span class="hl">Mobile-First?</span></div>
+  <div class="cards c2" style="max-width:800px">
+    <div class="card vlt">
+      <div class="card-icon">📱</div>
+      <div class="card-title">60%+ web traffic is mobile</div>
+      <div class="card-body">More than half of all internet browsing happens on a phone. If your design only works on desktop, you're ignoring most users.</div>
+    </div>
+    <div class="card coral">
+      <div class="card-icon">🔍</div>
+      <div class="card-title">Google ranks mobile-first</div>
+      <div class="card-body">Google uses the mobile version of your site for indexing and ranking. A poor mobile UI directly hurts search visibility.</div>
+    </div>
+    <div class="card gold">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">Forces prioritisation</div>
+      <div class="card-body">Small screen = limited space. You're forced to keep only what truly matters — which makes the whole product cleaner.</div>
+    </div>
+    <div class="card green">
+      <div class="card-icon">📈</div>
+      <div class="card-title">Better conversion rates</div>
+      <div class="card-body">Smooth mobile experiences directly lead to higher sign-ups, purchases, and task completions.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: Desktop-First vs Mobile-First -->
+<div class="slide">
+  <div class="eyebrow">Approaches Compared</div>
+  <div class="slide-title">Desktop-First <span class="hl-c">vs</span> Mobile-First</div>
+  <div class="vs-wrap">
+    <div class="panel" style="border-top:3px solid var(--coral)">
+      <div class="panel-label" style="color:var(--coral)">Desktop-First</div>
+      <ul class="check-list">
+        <li>Start with a wide, feature-rich layout</li>
+        <li>Then squeeze it into mobile</li>
+        <li>Often leads to hidden menus and tiny text</li>
+        <li>Elements get removed or squished</li>
+        <li>Mobile feels like an afterthought</li>
+      </ul>
+    </div>
+    <div class="vs-badge">vs</div>
+    <div class="panel" style="border-top:3px solid var(--green)">
+      <div class="panel-label" style="color:var(--green)">Mobile-First</div>
+      <ul class="check-list">
+        <li>Start with the smallest screen</li>
+        <li>Add complexity as screen grows</li>
+        <li>Forces clear hierarchy from the start</li>
+        <li>Content is always the priority</li>
+        <li>Desktop becomes an enhancement</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: Responsive Basics -->
+<div class="slide">
+  <div class="eyebrow">Core Concepts</div>
+  <div class="slide-title">Responsive <span class="hl">Design Basics</span></div>
+  <div class="cards c3">
+    <div class="card vlt">
+      <div class="card-icon">📐</div>
+      <div class="card-title">Breakpoints</div>
+      <div class="card-body">Set points where the layout changes. Common: 320px (phone), 768px (tablet), 1024px+ (desktop).</div>
+    </div>
+    <div class="card coral">
+      <div class="card-icon">🔲</div>
+      <div class="card-title">Fluid Grids</div>
+      <div class="card-body">Use percentages or "fr" units instead of fixed pixels. Columns reflow based on available space.</div>
+    </div>
+    <div class="card gold">
+      <div class="card-icon">🖼️</div>
+      <div class="card-title">Flexible Images</div>
+      <div class="card-body">Images should resize within their container. max-width: 100% prevents overflow and distortion.</div>
+    </div>
+  </div>
+  <div style="margin-top:18px;background:var(--surface);border-radius:12px;padding:16px 24px;max-width:680px;width:100%">
+    <div style="font-size:.78rem;color:var(--dim);line-height:1.7"><span style="color:var(--gold);font-weight:600">Real-world analogy:</span> Think of responsive design like a water bottle — the water (content) stays the same but takes the shape of whatever container it's in.</div>
+  </div>
+</div>
+
+<!-- Slide 6: Touch-Friendly UI -->
+<div class="slide">
+  <div class="eyebrow">Designing for Thumbs</div>
+  <div class="slide-title">Touch-Friendly <span class="hl">UI Rules</span></div>
+  <div class="cards c2" style="max-width:800px">
+    <div class="card vlt">
+      <div class="card-icon">👍</div>
+      <div class="card-title">Tap Target Size</div>
+      <div class="card-body">Buttons and links should be at least 44×44px. Tiny targets frustrate users and cause mis-taps.</div>
+    </div>
+    <div class="card coral">
+      <div class="card-icon">👋</div>
+      <div class="card-title">Thumb Zone</div>
+      <div class="card-body">The bottom-center of a phone screen is easiest to reach. Put key actions there, not at the top corners.</div>
+    </div>
+    <div class="card gold">
+      <div class="card-icon">↕️</div>
+      <div class="card-title">Scroll vs Swipe</div>
+      <div class="card-body">Vertical scroll is natural on mobile. Horizontal swipe works for carousels. Never mix them unexpectedly.</div>
+    </div>
+    <div class="card green">
+      <div class="card-icon">🚫</div>
+      <div class="card-title">Avoid Hover States</div>
+      <div class="card-body">Touch screens have no hover. Any info hidden behind hover must be always visible or revealed on tap.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7: Thumb Zone Visual -->
+<div class="slide">
+  <div class="eyebrow">Design Insight</div>
+  <div class="slide-title">The <span class="hl">Thumb Zone</span></div>
+  <div class="two-col" style="max-width:800px">
+    <div class="panel" style="border-top:3px solid var(--vlt)">
+      <div class="panel-label" style="color:var(--vlt)">Easy to Reach</div>
+      <ul class="check-list">
+        <li>Bottom navigation bar</li>
+        <li>Floating action button (bottom-right)</li>
+        <li>Search bar at the bottom</li>
+        <li>Primary CTA in thumb zone</li>
+      </ul>
+      <div style="margin-top:14px;font-size:.8rem;color:var(--green)">✓ WhatsApp, Instagram, TikTok all use this</div>
+    </div>
+    <div class="panel" style="border-top:3px solid var(--coral)">
+      <div class="panel-label" style="color:var(--coral)">Hard to Reach</div>
+      <ul class="check-list">
+        <li>Top navigation on tall phones</li>
+        <li>Top-right corner icons</li>
+        <li>Small back buttons at top-left</li>
+        <li>Critical actions placed at top</li>
+      </ul>
+      <div style="margin-top:14px;font-size:.8rem;color:var(--coral)">✗ Causes strain, especially on large phones</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8: Activity -->
+<div class="slide">
+  <div class="eyebrow">Hands-On Practice</div>
+  <div class="slide-title">Activity: <span class="hl-g">Mobile Redesign</span></div>
+  <div class="act-box">
+    <div class="act-label">What To Do</div>
+    <ol class="act-steps">
+      <li>Pick any website you use regularly on desktop (news, shopping, banking)</li>
+      <li>Open it on your phone and note 3 things that feel broken or awkward</li>
+      <li>Sketch a mobile-first version of the homepage — just boxes and labels</li>
+      <li>Decide: what stays, what moves, what gets cut for mobile?</li>
+      <li>Share your before/after with the group</li>
+    </ol>
+    <div class="act-meta">
+      <span>✏️ 20 min activity</span>
+      <span>🗣️ 10 min share</span>
+      <span>❓ 10 min Q&A</span>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9: Key Takeaway -->
+<div class="slide">
+  <div class="eyebrow">Key Takeaway</div>
+  <div class="slide-title">Design Small, <span class="hl">Scale Up</span></div>
+  <div class="q-block">
+    <div class="q-mark">"</div>
+    <div class="q-text">Mobile-first is not about making things smaller — it's about being ruthlessly clear about what matters. When you design for the most constrained device first, every other screen gets a better experience too.</div>
+    <div class="q-tags">
+      <span class="qtag">Mobile-First</span>
+      <span class="qtag">Constraints = Clarity</span>
+      <span class="qtag">Thumb Zone</span>
+      <span class="qtag">Responsive</span>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10: Up Next + Contact -->
+<div class="slide">
+  <div class="eyebrow" style="color:var(--green)">Session Complete ✓</div>
+  <div class="slide-title">Great work <span class="hl">today!</span></div>
+  <div class="slide-sub">You understand mobile-first design and know how to adapt layouts for any screen size.</div>
+  <a class="next-card" href="session_16.html" target="_blank" rel="noopener">
+    <div class="next-label">Up Next →</div>
+    <div class="next-title">Session 16 — Design Systems & Style Guides</div>
+    <div class="next-arrow">→</div>
+  </a>
+  <div class="contact-row">
+    <a href="https://wa.me/919686959787" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.523 5.847L0 24l6.336-1.498A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.893 0-3.673-.5-5.217-1.373l-.374-.22-3.861.913.976-3.768-.242-.388A9.953 9.953 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      WhatsApp
+    </a>
+    <a href="http://linkedin.com/in/harikrishnam-raju/" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      LinkedIn
+    </a>
+    <a href="https://www.behance.net/rajuvegeshana" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029H23.726zm-7.726-3h3.543c-.094-1.452-.772-2.063-1.77-2.063-.983 0-1.61.607-1.773 2.063zM8 11.909c1.404.437 2.594 1.384 2.594 3.164 0 2.435-1.967 3.927-4.76 3.927H0V4h5.6c2.497 0 4.336 1.093 4.336 3.355 0 1.546-.876 2.287-1.936 2.554zM3 7v2.587h2.114c.929 0 1.403-.545 1.403-1.293S6.043 7 5.114 7H3zm2.979 4.737H3V14.5h2.979c1.031 0 1.568-.521 1.568-1.382s-.537-1.381-1.568-1.381z"/></svg>
+      Behance
+    </a>
+  </div>
+</div>
+
+</div><!-- end stage -->
+
+<div class="progress" id="progress"></div>
+<div class="slide-counter" id="counter"></div>
+<div class="nav">
+  <button id="prev">←</button>
+  <button id="next">→</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+document.querySelectorAll('.slide').forEach(s => {
+  const wm = document.getElementById('wm').content.cloneNode(true);
+  s.style.position = 'absolute';
+  s.appendChild(wm);
+});
+
+const prog = document.getElementById('progress');
+for(let i=0;i<total;i++){const d=document.createElement('div');d.className='dot';prog.appendChild(d);}
+
+function updateUI(){
+  document.getElementById('bar').style.width=((current+1)/total*100)+'%';
+  document.getElementById('counter').textContent=(current+1)+' / '+total;
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===current));
+}
+
+function goTo(n){
+  if(n<0||n>=total)return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add('exit');
+  setTimeout(()=>slides[current<n?current:n+1<total?n+1:n].classList&&slides[current].classList.remove('exit'),450);
+  slides[current].addEventListener('transitionend',function h(){slides[current].classList.remove('exit');this.removeEventListener('transitionend',h);});
+  current=n;
+  slides[current].classList.add('active');
+  updateUI();
+}
+
+document.getElementById('prev').addEventListener('click',()=>goTo(current-1));
+document.getElementById('next').addEventListener('click',()=>goTo(current+1));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(current+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(current-1);
+});
+updateUI();
+
+  // PDF download button
+  (function(){
+    var btn = document.createElement('button');
+    btn.id = 'pdf-btn';
+    btn.textContent = '⬇ Save PDF';
+    btn.setAttribute('title', 'Print / Save as PDF');
+    btn.style.cssText = 'position:fixed;bottom:18px;right:18px;z-index:9999;padding:8px 16px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    btn.addEventListener('click', function(){ window.print(); });
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
+    // fallback if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') document.body.appendChild(btn);
+  })();
+</script>
+</body>
+</html>

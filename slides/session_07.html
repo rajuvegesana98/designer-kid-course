@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 07 — UI Components & Patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F0E17;--surface:#1E1B32;--surf2:#252240;
+  --violet:#5B21B6;--vlt:#7C3AED;--vlt-dim:rgba(124,58,237,0.18);
+  --coral:#F4574A;--cor-dim:rgba(244,87,74,0.14);
+  --gold:#F5C518;--gld-dim:rgba(245,197,24,0.13);
+  --green:#34D399;--grn-dim:rgba(52,211,153,0.10);
+  --white:#F0EDF8;--dim:rgba(240,237,248,0.48);
+  --border:rgba(240,237,248,0.08);
+  --ff-head:'Syne',sans-serif;--ff-body:'DM Sans',sans-serif;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--white);font-family:var(--ff-body)}
+#topbar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--vlt),var(--coral));transition:width .4s ease;z-index:100}
+#deck{width:100%;height:100%;position:relative}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 80px;opacity:0;transform:translateX(60px);transition:opacity .4s ease,transform .4s ease;pointer-events:none}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
+.slide.exit{opacity:0;transform:translateX(-60px)}
+.wm{position:absolute;bottom:22px;left:28px;font-family:var(--ff-head);font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(240,237,248,0.09);text-transform:uppercase;pointer-events:none;user-select:none}
+#dots{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:100}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);border:1.5px solid var(--dim);cursor:pointer;transition:background .2s,transform .2s}
+.dot.on{background:var(--vlt);transform:scale(1.3)}
+#nav{position:fixed;bottom:20px;right:32px;display:flex;gap:10px;z-index:100}
+#nav button{background:var(--surf2);border:1px solid var(--border);color:var(--white);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;transition:background .2s}
+#nav button:hover{background:var(--vlt)}
+.eyebrow{font-family:var(--ff-body);font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--vlt);margin-bottom:12px}
+.slide-title{font-family:var(--ff-head);font-size:clamp(2rem,5vw,3.6rem);font-weight:800;line-height:1.1;margin-bottom:16px;text-align:center}
+.slide-sub{font-size:1.05rem;font-weight:300;color:var(--dim);max-width:640px;text-align:center;line-height:1.6;margin-bottom:28px}
+.accent-vlt{color:var(--vlt)}
+.accent-coral{color:var(--coral)}
+.accent-gold{color:var(--gold)}
+.accent-green{color:var(--green)}
+.card-grid{display:grid;gap:16px;width:100%;max-width:900px}
+.card-grid.g2{grid-template-columns:repeat(2,1fr)}
+.card-grid.g3{grid-template-columns:repeat(3,1fr)}
+.card-grid.g4{grid-template-columns:repeat(4,1fr)}
+.card-grid.g6{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:8px}
+.card-icon{font-size:1.8rem;margin-bottom:4px}
+.card-title{font-family:var(--ff-head);font-size:1rem;font-weight:700}
+.card-body{font-size:.9rem;color:var(--dim);line-height:1.55}
+.card.vlt{border-color:var(--vlt);background:var(--vlt-dim)}
+.card.coral{border-color:var(--coral);background:var(--cor-dim)}
+.card.gold{border-color:var(--gold);background:var(--gld-dim)}
+.card.green{border-color:var(--green);background:var(--grn-dim)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:100%;max-width:900px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;display:flex;flex-direction:column;gap:10px}
+.panel-title{font-family:var(--ff-head);font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.b-text{font-size:.9rem;color:var(--dim);line-height:1.6}
+.cover-kicker{font-size:.8rem;letter-spacing:4px;text-transform:uppercase;color:var(--vlt);font-weight:600;margin-bottom:20px}
+.week-badge{display:inline-block;background:var(--vlt-dim);border:1px solid var(--vlt);border-radius:20px;padding:4px 14px;font-size:.8rem;font-weight:600;color:var(--vlt);margin-bottom:24px}
+/* live component demos */
+.demo-area{background:var(--surf2);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:16px;width:100%;max-width:860px}
+.demo-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--vlt);margin-bottom:8px}
+/* button states */
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 20px;border-radius:8px;font-family:var(--ff-body);font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--vlt);color:#fff}
+.btn-primary:hover{background:#6D28D9}
+.btn-secondary{background:transparent;color:var(--white);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--vlt);background:var(--vlt-dim)}
+.btn-danger{background:var(--cor-dim);color:var(--coral);border:1.5px solid var(--coral)}
+.btn-disabled{background:var(--surface);color:var(--dim);border:1px solid var(--border);cursor:not-allowed;opacity:.5}
+/* input states */
+.input-group{display:flex;flex-direction:column;gap:6px}
+.input-label{font-size:.8rem;font-weight:500;color:var(--dim)}
+.input{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--ff-body);font-size:.9rem;width:100%;outline:none;transition:border-color .2s}
+.input:focus{border-color:var(--vlt)}
+.input.error{border-color:var(--coral)}
+.input-hint{font-size:.75rem;color:var(--dim)}
+.input-hint.error{color:var(--coral)}
+/* nav patterns */
+.nav-demo{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 20px}
+.nav-logo{font-family:var(--ff-head);font-size:.95rem;font-weight:700;color:var(--vlt)}
+.nav-links{display:flex;gap:20px}
+.nav-link{font-size:.85rem;color:var(--dim);text-decoration:none;transition:color .2s;cursor:pointer}
+.nav-link:hover,.nav-link.active{color:var(--white)}
+.nav-cta{background:var(--vlt);color:#fff;padding:8px 16px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;border:none}
+/* tabs */
+.tab-row{display:flex;border-bottom:1px solid var(--border);gap:0}
+.tab{padding:10px 20px;font-size:.88rem;font-weight:500;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--white);border-bottom-color:var(--vlt)}
+/* modal sketch */
+.modal-sketch{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:320px;width:100%}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.modal-title{font-family:var(--ff-head);font-size:.95rem;font-weight:700}
+.modal-close{background:var(--surf2);border:none;color:var(--dim);width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:.9rem}
+.modal-body{font-size:.85rem;color:var(--dim);line-height:1.6;margin-bottom:16px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end}
+/* pattern chips */
+.pattern-chip{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:.82rem;color:var(--white);font-weight:500}
+.pattern-chip.active{background:var(--vlt-dim);border-color:var(--vlt);color:var(--vlt)}
+/* quote */
+.quote-block{background:var(--surface);border-left:4px solid var(--vlt);border-radius:0 14px 14px 0;padding:28px 32px;max-width:720px;text-align:left}
+.quote-text{font-family:var(--ff-head);font-size:1.4rem;font-weight:700;line-height:1.4;margin-bottom:12px}
+.quote-attr{font-size:.85rem;color:var(--dim)}
+/* activity */
+.activity-box{background:var(--gld-dim);border:2px solid var(--gold);border-radius:16px;padding:32px 40px;max-width:720px;width:100%;display:flex;flex-direction:column;gap:16px}
+.a-title{font-family:var(--ff-head);font-size:1.5rem;font-weight:700;color:var(--gold)}
+.a-sub{font-size:.95rem;color:var(--dim);line-height:1.6}
+.a-steps{display:flex;flex-direction:column;gap:8px;counter-reset:step}
+.a-step{font-size:.9rem;color:var(--white);display:flex;gap:10px;align-items:flex-start}
+.a-step::before{content:counter(step);counter-increment:step;min-width:22px;height:22px;background:var(--gold);color:#000;border-radius:50%;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.contact-row{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.contact-link{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:10px 20px;text-decoration:none;color:var(--white);font-size:.9rem;font-weight:500;transition:border-color .2s,background .2s}
+.contact-link:hover{border-color:var(--vlt);background:var(--vlt-dim)}
+.up-next{display:inline-flex;align-items:center;gap:8px;margin-top:24px;background:var(--vlt);color:#fff;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:600;font-size:.95rem;transition:background .2s}
+.up-next:hover{background:#6D28D9}
+
+  #pdf-btn { display: none !important; }
+}
+
+/* ── Shared session nav bar ── */
+.sn-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0d9f5;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 2px 8px rgba(91,33,182,0.07);
+  min-height: 48px;
+}
+.sn-bar a, .sn-bar button {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 7px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.sn-back { background: #f0eef9; color: #5B21B6; }
+.sn-back:hover { background: #e0d9f5; }
+.sn-prev, .sn-next { background: #f0eef9; color: #5B21B6; }
+.sn-prev:hover, .sn-next:hover { background: #e0d9f5; }
+.sn-prev[disabled], .sn-next[disabled] { opacity: .35; pointer-events: none; }
+.sn-title { flex: 1; font-size: .88rem; font-weight: 600; color: #1a1830; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sn-download { background: #5B21B6; color: #fff; }
+.sn-download:hover { background: #7C3AED; }
+.sn-theme { background: #f0eef9; color: #5B21B6; font-size: 1rem; padding: 5px 10px; }
+.sn-theme:hover { background: #e0d9f5; }
+/* push deck content below nav bar */
+body > .deck, body > div.deck { padding-top: 48px; }
+/* light theme override */
+[data-theme="light"] .sn-bar { background: #fff; border-color: #e0d9f5; }
+[data-theme="dark"]  .sn-bar { background: #1A1830; border-color: #2E2A4A; }
+[data-theme="dark"]  .sn-title { color: #EDECF4; }
+[data-theme="dark"]  .sn-back, [data-theme="dark"] .sn-prev, [data-theme="dark"] .sn-next, [data-theme="dark"] .sn-theme { background: #2E2A4A; color: #a78bfa; }
+
+/* ── Light theme tokens ── */
+[data-theme="light"] {
+  --bg: #FAFAF8 !important;
+  --bg2: #F0EEF9 !important;
+  --surface: #fff !important;
+  --surf2: #F0EEF9 !important;
+  --white: #0F0E17 !important;
+  --dim: rgba(15,14,23,0.55) !important;
+  --dim2: rgba(15,14,23,0.35) !important;
+  --border: rgba(91,33,182,0.12) !important;
+}
+[data-theme="light"] html, [data-theme="light"] body,
+html[data-theme="light"], body[data-theme="light"] {
+  background: #FAFAF8 !important;
+  color: #0F0E17 !important;
+}
+[data-theme="light"] .slide,
+[data-theme="light"] .slide * { color: inherit; }
+
+/* ── Print CSS (clean PDF) ── */
+@media print {
+  .sn-bar { display: none !important; }
+  body { padding-top: 0 !important; }
+  body > .deck { padding-top: 0 !important; }
+  .botnav, #nav, .nav-row, [id="prev"], [id="next"], #dots, .dot, .prog, .topbar, .tb-count { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; overflow: visible !important; height: auto !important; }
+  .slide { display: none !important; page-break-after: always; break-after: page; position: relative !important; height: 100vh !important; opacity: 1 !important; transform: none !important; }
+  .slide.active { display: flex !important; background: #fff !important; }
+  .stage { overflow: visible !important; height: auto !important; }
+  .deck { height: auto !important; overflow: visible !important; padding-top: 0 !important; }
+}
+</style>
+</head>
+<body>
+<!-- ── Session Nav Bar ── -->
+<div class="sn-bar" id="snBar">
+  <a class="sn-back" href="../site/sessions.html">← Sessions</a>
+  <a class="sn-prev" href="session_06.html?n=6">‹ S06</a>
+  <span class="sn-title">S07 · UI Components & Patterns</span>
+  <a class="sn-next" href="session_08.html?n=8">S08 ›</a>
+  <button class="sn-download sn-bar" onclick="window.print()">⬇ PDF</button>
+  <button class="sn-theme" id="snTheme" title="Toggle theme">🌙</button>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('snTheme');
+  var root = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('dk-session-theme'); } catch(e){}
+  // default to light
+  if (!saved) saved = 'light';
+  root.setAttribute('data-theme', saved);
+  btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+  btn.addEventListener('click', function(){
+    var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('dk-session-theme', t); } catch(e){}
+  });
+})();
+</script>
+<div id="topbar"></div>
+<div id="deck">
+
+<!-- SLIDE 1: COVER -->
+<section class="slide active">
+  <div class="cover-kicker">Designer_Kid Studios · Week 2</div>
+  <div class="week-badge">Session 07 of 20</div>
+  <h1 class="slide-title">UI Components<br>&amp; <span class="accent-vlt">Patterns</span></h1>
+  <p class="slide-sub">The reusable building blocks every interface is made from — and the patterns that connect them.</p>
+</section>
+
+<!-- SLIDE 2: AGENDA -->
+<section class="slide">
+  <div class="eyebrow">Today's Session</div>
+  <h2 class="slide-title" style="font-size:2.4rem">What We'll Cover</h2>
+  <div class="card-grid g2" style="max-width:700px">
+    <div class="card vlt"><div class="card-icon">🧱</div><div class="card-title">Core Components</div><div class="card-body">Buttons, inputs, navigation, modals — the vocabulary of UI</div></div>
+    <div class="card vlt"><div class="card-icon">🔄</div><div class="card-title">Component States</div><div class="card-body">Default, hover, active, disabled, error — designing all scenarios</div></div>
+    <div class="card vlt"><div class="card-icon">🗺️</div><div class="card-title">UI Patterns</div><div class="card-body">Repeated interaction solutions: cards, grids, modals, tabs</div></div>
+    <div class="card vlt"><div class="card-icon">⚙️</div><div class="card-title">Atomic Design</div><div class="card-body">Atoms → Molecules → Organisms — a system for building at scale</div></div>
+  </div>
+</section>
+
+<!-- SLIDE 3: BUTTONS -->
+<section class="slide">
+  <div class="eyebrow">Core Components</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Buttons — The Most Clicked Component</h2>
+  <p class="slide-sub" style="margin-bottom:16px">Every button communicates a level of importance. Your hierarchy: Primary → Secondary → Destructive → Ghost.</p>
+  <div class="demo-area">
+    <div class="demo-label">Button Types (live)</div>
+    <div class="btn-row">
+      <button class="btn btn-primary">Primary Action</button>
+      <button class="btn btn-secondary">Secondary</button>
+      <button class="btn btn-danger">Delete</button>
+      <button class="btn btn-disabled" disabled>Disabled</button>
+    </div>
+    <div style="font-size:.82rem;color:var(--dim);border-top:1px solid var(--border);padding-top:14px">
+      Rule: Only one primary CTA per screen. Multiple primary buttons compete and confuse.
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4: INPUTS -->
+<section class="slide">
+  <div class="eyebrow">Core Components</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Inputs &amp; Form Fields</h2>
+  <p class="slide-sub" style="margin-bottom:16px">Forms are where users give you data. Every state must be clearly communicated.</p>
+  <div class="demo-area">
+    <div class="demo-label">Input States (live)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="input-group">
+        <label class="input-label">Email address (default)</label>
+        <input class="input" type="email" placeholder="you@example.com">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email address (focused — click)</label>
+        <input class="input" type="email" placeholder="you@example.com" autofocus>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Password (error state)</label>
+        <input class="input error" type="password" value="wrongpassword">
+        <span class="input-hint error">Password must be at least 8 characters</span>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Username (with hint)</label>
+        <input class="input" type="text" placeholder="harikrishnam">
+        <span class="input-hint">3–20 characters, no spaces</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5: NAVIGATION PATTERNS -->
+<section class="slide">
+  <div class="eyebrow">Navigation Patterns</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Finding Your Way Around</h2>
+  <p class="slide-sub" style="margin-bottom:16px">Navigation is the skeleton that connects your IA to the interface. Pick the pattern that fits the content volume.</p>
+  <div class="demo-area" style="gap:20px">
+    <div>
+      <div class="demo-label">Top Nav Bar</div>
+      <div class="nav-demo">
+        <div class="nav-logo">Designer_Kid</div>
+        <div class="nav-links">
+          <span class="nav-link active">Courses</span>
+          <span class="nav-link">Resources</span>
+          <span class="nav-link">About</span>
+        </div>
+        <button class="nav-cta">Enrol Now</button>
+      </div>
+    </div>
+    <div>
+      <div class="demo-label">Tab Navigation</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+        <div class="tab-row">
+          <div class="tab active">Overview</div>
+          <div class="tab">Curriculum</div>
+          <div class="tab">Reviews</div>
+          <div class="tab">FAQ</div>
+        </div>
+        <div style="padding:14px 16px;font-size:.85rem;color:var(--dim)">Tab content area — swaps without a full page load</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6: MODALS & OVERLAYS -->
+<section class="slide">
+  <div class="eyebrow">UI Patterns</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Modals &amp; Overlays</h2>
+  <p class="slide-sub" style="margin-bottom:16px">Modals interrupt users to demand a decision. Use them only when the action can't wait or context matters.</p>
+  <div style="display:flex;gap:32px;align-items:flex-start;width:100%;max-width:860px">
+    <div class="modal-sketch">
+      <div class="modal-header">
+        <span class="modal-title">Confirm Delete</span>
+        <button class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">Are you sure you want to delete "Session 01 Slides"? This action cannot be undone.</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" style="padding:8px 16px;font-size:.8rem">Cancel</button>
+        <button class="btn btn-danger" style="padding:8px 16px;font-size:.8rem">Delete</button>
+      </div>
+    </div>
+    <div class="card-grid g2" style="max-width:440px">
+      <div class="card green"><div class="card-title accent-green">Use modals for</div><div class="card-body">Confirm destructive actions, collect essential info, display previews</div></div>
+      <div class="card coral"><div class="card-title accent-coral">Avoid modals for</div><div class="card-body">Marketing messages, non-critical info, anything with lots of scrolling</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7: ATOMIC DESIGN -->
+<section class="slide">
+  <div class="eyebrow">Atomic Design</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Building Blocks → Systems</h2>
+  <p class="slide-sub" style="margin-bottom:20px">Brad Frost's model: design smallest first, compose upward. Every screen is atoms stacked into organisms.</p>
+  <div class="card-grid g4" style="max-width:900px">
+    <div class="card vlt">
+      <div style="font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--vlt);margin-bottom:8px">Atoms</div>
+      <div class="card-body">Button, input, label, icon, colour token, font size</div>
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <button class="btn btn-primary" style="padding:6px 12px;font-size:.75rem">Btn</button>
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--vlt)"></div>
+      </div>
+    </div>
+    <div class="card gold">
+      <div style="font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Molecules</div>
+      <div class="card-body">Search field = input + button + icon combined</div>
+      <div style="margin-top:8px;display:flex;gap:4px">
+        <input class="input" placeholder="Search..." style="padding:6px 10px;font-size:.75rem;flex:1">
+        <button class="btn btn-primary" style="padding:6px 10px;font-size:.75rem">Go</button>
+      </div>
+    </div>
+    <div class="card coral">
+      <div style="font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--coral);margin-bottom:8px">Organisms</div>
+      <div class="card-body">Nav bar = logo + links + search + CTA all together</div>
+      <div style="margin-top:8px;background:var(--surface);border-radius:6px;padding:8px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.7rem;font-weight:700;color:var(--vlt)">DK</span>
+        <span style="font-size:.7rem;color:var(--dim)">Home · About</span>
+        <button class="btn btn-primary" style="padding:4px 8px;font-size:.7rem">Enrol</button>
+      </div>
+    </div>
+    <div class="card green">
+      <div style="font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:8px">Templates</div>
+      <div class="card-body">Organisms arranged into a page layout skeleton — no content yet</div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">
+        <div style="background:var(--surface);height:10px;border-radius:3px"></div>
+        <div style="background:var(--surf2);height:30px;border-radius:3px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div style="background:var(--surface);height:14px;border-radius:3px"></div><div style="background:var(--surface);height:14px;border-radius:3px"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8: COMMON UI PATTERNS -->
+<section class="slide">
+  <div class="eyebrow">UI Patterns</div>
+  <h2 class="slide-title" style="font-size:2.2rem">Patterns Every Designer Should Know</h2>
+  <div class="card-grid g6" style="max-width:900px">
+    <div class="card"><div class="card-icon">🃏</div><div class="card-title">Cards</div><div class="card-body">Container that groups related info with equal visual weight</div></div>
+    <div class="card"><div class="card-icon">📋</div><div class="card-title">Data Tables</div><div class="card-body">Structured rows and columns for comparing values</div></div>
+    <div class="card"><div class="card-icon">⬇️</div><div class="card-title">Infinite Scroll</div><div class="card-body">Load more content as user scrolls — no pagination click needed</div></div>
+    <div class="card"><div class="card-icon">🍞</div><div class="card-title">Breadcrumbs</div><div class="card-body">Show the user's location in the hierarchy: Home › Courses › Session 07</div></div>
+    <div class="card"><div class="card-icon">💬</div><div class="card-title">Toast Notifications</div><div class="card-body">Non-blocking feedback messages: "Saved", "Error", "Copied"</div></div>
+    <div class="card"><div class="card-icon">🔽</div><div class="card-title">Accordion</div><div class="card-body">Collapsible sections — great for FAQ and settings panels</div></div>
+  </div>
+</section>
+
+<!-- SLIDE 9: KEY TAKEAWAY -->
+<section class="slide">
+  <div class="eyebrow">Key Takeaway</div>
+  <div class="quote-block">
+    <div class="quote-text">"Design familiar patterns. Invent new interactions only when familiar ones genuinely can't do the job."</div>
+    <div class="quote-attr">— UI Pattern Principle</div>
+  </div>
+  <div class="card-grid g3" style="max-width:760px;margin-top:28px">
+    <div class="card" style="text-align:center"><div class="card-icon">🧱</div><div class="card-title">Use Components</div><div class="card-body">Don't reinvent buttons and inputs — spend creativity on the unique parts</div></div>
+    <div class="card" style="text-align:center"><div class="card-icon">🔄</div><div class="card-title">Design All States</div><div class="card-body">Default, hover, focus, disabled, error — incomplete states cause bugs</div></div>
+    <div class="card" style="text-align:center"><div class="card-icon">⚙️</div><div class="card-title">Think in Systems</div><div class="card-body">Atoms to organisms — build small, compose big</div></div>
+  </div>
+</section>
+
+<!-- SLIDE 10: ACTIVITY -->
+<section class="slide">
+  <div class="eyebrow">Hands-On Activity</div>
+  <div class="activity-box">
+    <div class="a-title">🧱 Component Audit</div>
+    <div class="a-sub">Reverse-engineer any app's UI into its component building blocks — 20 mins · 10 mins share</div>
+    <div class="a-steps">
+      <div class="a-step">Open any app you use daily (Zomato, Spotify, LinkedIn, Twitter)</div>
+      <div class="a-step">Screenshot 2–3 screens and list every UI component you can identify</div>
+      <div class="a-step">Label each: button, input, card, nav, modal, tab, etc.</div>
+      <div class="a-step">Find one component that appears in at least 3 different states — what changes between states?</div>
+      <div class="a-step">Share: which component surprised you most, and why?</div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 11: UP NEXT -->
+<section class="slide">
+  <div class="eyebrow">Wrapping Up · Session 07</div>
+  <h2 class="slide-title" style="font-size:2.6rem">Great Work Today 🎉</h2>
+  <p class="slide-sub">You now think in components and patterns. Next: connecting those components into clickable prototypes.</p>
+  <div class="contact-row">
+    <a class="contact-link" href="https://wa.me/919686959787" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      WhatsApp
+    </a>
+    <a class="contact-link" href="http://linkedin.com/in/harikrishnam-raju/" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      LinkedIn
+    </a>
+    <a class="contact-link" href="https://www.behance.net/rajuvegeshana" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#1769FF"><path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029H23.72zm-7.726-3h3.578c-.118-1.662-1.118-2.108-1.742-2.108-.701 0-1.713.358-1.836 2.108zM8.994 6.987c1.678 0 3.773.513 3.773 3.007 0 1.686-1.1 2.286-1.696 2.566.978.3 2.354.887 2.354 2.9 0 2.908-2.187 3.652-4.321 3.652H2V6.987h6.994zm-1.178 5.008c.779 0 2.04-.164 2.04-1.424 0-1.218-1.146-1.416-2.04-1.416H5.432v2.84h2.384zm.196 5.237c.877 0 2.13-.173 2.13-1.623 0-1.513-1.215-1.628-2.13-1.628H5.432v3.251h2.58z"/></svg>
+      Behance
+    </a>
+  </div>
+  <a class="up-next" href="session_08.html">Up Next: Prototyping Basics →</a>
+</section>
+
+</div><!-- /deck -->
+<div id="dots"></div>
+<div id="nav"><button id="prev">‹</button><button id="next">›</button></div>
+<template id="wm"><div class="wm">DESIGNER_KID</div></template>
+<script>
+const slides=Array.from(document.querySelectorAll('.slide'));
+const total=slides.length;let current=0;
+const dotsEl=document.getElementById('dots');
+const bar=document.getElementById('topbar');
+slides.forEach(s=>s.appendChild(document.getElementById('wm').content.cloneNode(true)));
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' on':'');d.addEventListener('click',()=>goTo(i));dotsEl.appendChild(d);});
+function updateUI(){document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===current));bar.style.width=((current+1)/total*100)+'%';}
+function goTo(n){if(n<0||n>=total)return;slides[current].classList.remove('active');slides[current].classList.add('exit');setTimeout(()=>slides[current].classList.remove('exit'),450);current=n;slides[current].classList.add('active');updateUI();}
+document.getElementById('prev').addEventListener('click',()=>goTo(current-1));
+document.getElementById('next').addEventListener('click',()=>goTo(current+1));
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(current+1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(current-1);});
+updateUI();
+
+  // PDF download button
+  (function(){
+    var btn = document.createElement('button');
+    btn.id = 'pdf-btn';
+    btn.textContent = '⬇ Save PDF';
+    btn.setAttribute('title', 'Print / Save as PDF');
+    btn.style.cssText = 'position:fixed;bottom:18px;right:18px;z-index:9999;padding:8px 16px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    btn.addEventListener('click', function(){ window.print(); });
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
+    // fallback if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') document.body.appendChild(btn);
+  })();
+</script>
+</body>
+</html>

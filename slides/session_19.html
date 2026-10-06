@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 19 — Portfolio Building & Case Studies</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F0E17;--surface:#1E1B32;--surf2:#252240;--violet:#5B21B6;--vlt:#7C3AED;--vlt-dim:rgba(124,58,237,.18);--coral:#F4574A;--cor-dim:rgba(244,87,74,.14);--gold:#F5C518;--gld-dim:rgba(245,197,24,.13);--green:#34D399;--grn-dim:rgba(52,211,153,.10);--white:#F0EDF8;--dim:rgba(240,237,248,.48);--border:rgba(240,237,248,.08);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;height:100vh;overflow:hidden;}
+.topbar{position:fixed;top:0;left:0;width:0%;height:3px;background:linear-gradient(90deg,var(--vlt),var(--coral));z-index:100;transition:width .4s;}
+.stage{width:100vw;height:100vh;position:relative;overflow:hidden;}
+.slide{position:absolute;inset:0;padding:56px 60px 40px;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateX(60px);transition:opacity .45s,transform .45s;pointer-events:none;}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all;}
+.slide.exit{opacity:0;transform:translateX(-60px);}
+.eyebrow{font-family:'Syne',sans-serif;font-size:.65rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--vlt);margin-bottom:10px;}
+.slide-title{font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;line-height:1.15;margin-bottom:10px;}
+.slide-sub{color:var(--dim);font-size:1rem;line-height:1.6;max-width:640px;margin-bottom:28px;}
+.hl{color:var(--vlt);}.hl-coral{color:var(--coral);}.hl-gold{color:var(--gold);}.hl-green{color:var(--green);}
+.cards{display:grid;gap:16px;flex:1;}
+.cards.c2{grid-template-columns:1fr 1fr;}
+.cards.c3{grid-template-columns:1fr 1fr 1fr;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:8px;}
+.card.vlt{border-top:3px solid var(--vlt);}.card.coral{border-top:3px solid var(--coral);}.card.gold{border-top:3px solid var(--gold);}.card.green{border-top:3px solid var(--green);}
+.card-icon{font-size:1.4rem;margin-bottom:4px;}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;}
+.card-body{color:var(--dim);font-size:.82rem;line-height:1.55;}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600;letter-spacing:.05em;}
+.tag.vlt{background:var(--vlt-dim);color:var(--vlt);}.tag.coral{background:var(--cor-dim);color:var(--coral);}.tag.gold{background:var(--gld-dim);color:var(--gold);}.tag.green{background:var(--grn-dim);color:var(--green);}
+.steps-col{display:flex;flex-direction:column;gap:10px;flex:1;}
+.step-row{display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--vlt-dim);border:1px solid var(--vlt);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.8rem;color:var(--vlt);flex-shrink:0;}
+.step-info h4{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:4px;}
+.step-info p{color:var(--dim);font-size:.8rem;line-height:1.5;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;}
+.panel h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:12px;}
+.nav{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;z-index:90;}
+.nav button{background:var(--surface);border:1px solid var(--border);color:var(--white);padding:8px 22px;border-radius:30px;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;transition:background .2s;}
+.nav button:hover{background:var(--surf2);}
+.dots{display:flex;gap:6px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s;}
+.dot.on{background:var(--vlt);transform:scale(1.4);}
+.wm{position:absolute;bottom:18px;left:22px;z-index:50;opacity:.18;pointer-events:none;font-family:'Syne',sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.08em;color:var(--white);}
+.contact-row{display:flex;gap:14px;margin-top:18px;flex-wrap:wrap;}
+.clink{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:30px;padding:9px 18px;font-size:.8rem;color:var(--white);text-decoration:none;transition:border-color .2s;}
+.clink:hover{border-color:var(--vlt);}
+.next-card{display:inline-flex;align-items:center;gap:12px;background:var(--vlt-dim);border:1px solid var(--vlt);border-radius:14px;padding:18px 24px;text-decoration:none;color:var(--white);margin-top:16px;transition:background .2s;}
+.next-card:hover{background:rgba(124,58,237,.3);}
+.nc-label{font-size:.7rem;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;}
+.nc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;}
+
+  #pdf-btn { display: none !important; }
+}
+
+/* ── Shared session nav bar ── */
+.sn-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0d9f5;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 2px 8px rgba(91,33,182,0.07);
+  min-height: 48px;
+}
+.sn-bar a, .sn-bar button {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 7px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.sn-back { background: #f0eef9; color: #5B21B6; }
+.sn-back:hover { background: #e0d9f5; }
+.sn-prev, .sn-next { background: #f0eef9; color: #5B21B6; }
+.sn-prev:hover, .sn-next:hover { background: #e0d9f5; }
+.sn-prev[disabled], .sn-next[disabled] { opacity: .35; pointer-events: none; }
+.sn-title { flex: 1; font-size: .88rem; font-weight: 600; color: #1a1830; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sn-download { background: #5B21B6; color: #fff; }
+.sn-download:hover { background: #7C3AED; }
+.sn-theme { background: #f0eef9; color: #5B21B6; font-size: 1rem; padding: 5px 10px; }
+.sn-theme:hover { background: #e0d9f5; }
+/* push deck content below nav bar */
+body > .deck, body > div.deck { padding-top: 48px; }
+/* light theme override */
+[data-theme="light"] .sn-bar { background: #fff; border-color: #e0d9f5; }
+[data-theme="dark"]  .sn-bar { background: #1A1830; border-color: #2E2A4A; }
+[data-theme="dark"]  .sn-title { color: #EDECF4; }
+[data-theme="dark"]  .sn-back, [data-theme="dark"] .sn-prev, [data-theme="dark"] .sn-next, [data-theme="dark"] .sn-theme { background: #2E2A4A; color: #a78bfa; }
+
+/* ── Light theme tokens ── */
+[data-theme="light"] {
+  --bg: #FAFAF8 !important;
+  --bg2: #F0EEF9 !important;
+  --surface: #fff !important;
+  --surf2: #F0EEF9 !important;
+  --white: #0F0E17 !important;
+  --dim: rgba(15,14,23,0.55) !important;
+  --dim2: rgba(15,14,23,0.35) !important;
+  --border: rgba(91,33,182,0.12) !important;
+}
+[data-theme="light"] html, [data-theme="light"] body,
+html[data-theme="light"], body[data-theme="light"] {
+  background: #FAFAF8 !important;
+  color: #0F0E17 !important;
+}
+[data-theme="light"] .slide,
+[data-theme="light"] .slide * { color: inherit; }
+
+/* ── Print CSS (clean PDF) ── */
+@media print {
+  .sn-bar { display: none !important; }
+  body { padding-top: 0 !important; }
+  body > .deck { padding-top: 0 !important; }
+  .botnav, #nav, .nav-row, [id="prev"], [id="next"], #dots, .dot, .prog, .topbar, .tb-count { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; overflow: visible !important; height: auto !important; }
+  .slide { display: none !important; page-break-after: always; break-after: page; position: relative !important; height: 100vh !important; opacity: 1 !important; transform: none !important; }
+  .slide.active { display: flex !important; background: #fff !important; }
+  .stage { overflow: visible !important; height: auto !important; }
+  .deck { height: auto !important; overflow: visible !important; padding-top: 0 !important; }
+}
+</style>
+</head>
+<body>
+<!-- ── Session Nav Bar ── -->
+<div class="sn-bar" id="snBar">
+  <a class="sn-back" href="../site/sessions.html">← Sessions</a>
+  <a class="sn-prev" href="session_18.html?n=18">‹ S18</a>
+  <span class="sn-title">S19 · Portfolio & Case Studies</span>
+  <a class="sn-next" href="session_20.html?n=20">S20 ›</a>
+  <button class="sn-download sn-bar" onclick="window.print()">⬇ PDF</button>
+  <button class="sn-theme" id="snTheme" title="Toggle theme">🌙</button>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('snTheme');
+  var root = document.documentElement;
+  var saved;
+  try { saved = localStorage.getItem('dk-session-theme'); } catch(e){}
+  // default to light
+  if (!saved) saved = 'light';
+  root.setAttribute('data-theme', saved);
+  btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+  btn.addEventListener('click', function(){
+    var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('dk-session-theme', t); } catch(e){}
+  });
+})();
+</script>
+<div class="topbar" id="bar"></div>
+<div class="stage" id="stage">
+
+<!-- Slide 1: Cover -->
+<div class="slide active" id="s0">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Week 5 · Session 19</div>
+  <div class="slide-title">Portfolio Building<br><span class="hl">& Case Studies</span></div>
+  <div class="slide-sub">Your portfolio is your proof. Learn how to present your work so hiring managers and clients instantly understand your thinking — not just your pixels.</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+    <span class="tag vlt">Case Studies</span><span class="tag coral">Storytelling</span><span class="tag gold">Behance / Notion</span><span class="tag green">Stand Out</span>
+  </div>
+</div>
+
+<!-- Slide 2: Agenda -->
+<div class="slide" id="s1">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Agenda</div>
+  <div class="slide-title">What We'll Cover</div>
+  <div class="steps-col">
+    <div class="step-row"><div class="step-num">01</div><div class="step-info"><h4>What recruiters look for</h4><p>Process over polish — why thinking matters more than finished screens</p></div></div>
+    <div class="step-row"><div class="step-num">02</div><div class="step-info"><h4>Case study structure</h4><p>The 6-part framework every strong case study follows</p></div></div>
+    <div class="step-row"><div class="step-num">03</div><div class="step-info"><h4>Writing your case study</h4><p>How to turn a student project into a compelling narrative</p></div></div>
+    <div class="step-row"><div class="step-num">04</div><div class="step-info"><h4>Portfolio platforms</h4><p>Behance, Notion, Framer, personal site — which one to pick</p></div></div>
+    <div class="step-row"><div class="step-num">05</div><div class="step-info"><h4>Common mistakes</h4><p>What kills portfolios — and how to avoid them</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 3: What Recruiters Look For -->
+<div class="slide" id="s2">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Recruiter Mindset</div>
+  <div class="slide-title">What They <span class="hl-coral">Actually</span> Look For</div>
+  <div class="slide-sub">Recruiters spend 3–5 minutes on a portfolio. They're not admiring your UI — they're checking if you can solve problems.</div>
+  <div class="two-col">
+    <div class="panel" style="border-left:3px solid var(--green);">
+      <h3 style="color:var(--green);">They want to see...</h3>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <li style="font-size:.82rem;color:var(--dim);">✅ Can you identify a real user problem?</li>
+        <li style="font-size:.82rem;color:var(--dim);">✅ Do you do research before jumping to Figma?</li>
+        <li style="font-size:.82rem;color:var(--dim);">✅ Can you explain why you made each design decision?</li>
+        <li style="font-size:.82rem;color:var(--dim);">✅ Do you iterate based on feedback?</li>
+        <li style="font-size:.82rem;color:var(--dim);">✅ Is your work clearly presented and easy to scan?</li>
+      </ul>
+    </div>
+    <div class="panel" style="border-left:3px solid var(--coral);">
+      <h3 style="color:var(--coral);">They get bored by...</h3>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <li style="font-size:.82rem;color:var(--dim);">❌ 20 static mockups with no context</li>
+        <li style="font-size:.82rem;color:var(--dim);">❌ "I redesigned Instagram" (with no research)</li>
+        <li style="font-size:.82rem;color:var(--dim);">❌ Projects that just show the final screens</li>
+        <li style="font-size:.82rem;color:var(--dim);">❌ No explanation of what problem was solved</li>
+        <li style="font-size:.82rem;color:var(--dim);">❌ Generic lorem ipsum copy everywhere</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: Case Study Structure -->
+<div class="slide" id="s3">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Framework</div>
+  <div class="slide-title">Case Study <span class="hl">Structure</span></div>
+  <div class="steps-col">
+    <div class="step-row"><div class="step-num">01</div><div class="step-info"><h4>The Problem</h4><p>What was broken or missing? Who was affected? One sentence that a 10-year-old could understand.</p></div></div>
+    <div class="step-row"><div class="step-num">02</div><div class="step-info"><h4>My Role</h4><p>What did you personally do? Researcher, sole designer, part of a team? Be honest about your contribution.</p></div></div>
+    <div class="step-row"><div class="step-num">03</div><div class="step-info"><h4>Research</h4><p>Who did you talk to? What did you learn? Show your interview notes, surveys, or observations — raw proof you understood users.</p></div></div>
+    <div class="step-row"><div class="step-num">04</div><div class="step-info"><h4>Process</h4><p>Persona, user flow, wireframes, iterations. Show the messy middle — that's where thinking lives.</p></div></div>
+    <div class="step-row"><div class="step-num">05</div><div class="step-info"><h4>Final Solution</h4><p>The polished screens or prototype. Keep it concise — 4–6 key screens max. Label what each one does.</p></div></div>
+    <div class="step-row"><div class="step-num">06</div><div class="step-info"><h4>Outcome & Reflection</h4><p>What happened after? What would you do differently? This shows maturity — most beginners skip it.</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 5: Writing Your Case Study -->
+<div class="slide" id="s4">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Writing Tips</div>
+  <div class="slide-title">Write It Like a <span class="hl-gold">Story</span></div>
+  <div class="cards c2" style="max-height:55vh;">
+    <div class="card vlt"><div class="card-icon">📝</div><div class="card-title">Short sentences win</div><div class="card-body">Write like you're explaining to a friend. "I interviewed 5 users and found they hated the checkout flow." Not "Qualitative research methodologies were employed."</div></div>
+    <div class="card coral"><div class="card-icon">🖼</div><div class="card-title">Show, don't just tell</div><div class="card-body">Every claim needs a visual. Saying "I did wireframes" is weak. Showing the actual wireframe is strong. If you don't have it, recreate it.</div></div>
+    <div class="card gold"><div class="card-icon">🔢</div><div class="card-title">Use numbers when you can</div><div class="card-body">"Users completed checkout 40% faster" beats "improved the checkout flow". Even estimated or hypothetical metrics show you think about impact.</div></div>
+    <div class="card green"><div class="card-icon">🔄</div><div class="card-title">Show the before & after</div><div class="card-body">Side-by-side comparisons of old vs new are incredibly powerful. It makes improvement obvious even to non-designers.</div></div>
+  </div>
+</div>
+
+<!-- Slide 6: Portfolio Platforms -->
+<div class="slide" id="s5">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Platforms</div>
+  <div class="slide-title">Where to <span class="hl">Publish</span></div>
+  <div class="cards c2" style="max-height:58vh;">
+    <div class="card vlt"><div class="card-icon">🎨</div><div class="card-title">Behance (Recommended for beginners)</div><div class="card-body">Free, widely recognised by recruiters in India. Easy drag-and-drop case study builder. Good for visual storytelling. Link directly in your resume and LinkedIn.</div><span class="tag vlt" style="margin-top:4px;">behance.net</span></div>
+    <div class="card gold"><div class="card-icon">📄</div><div class="card-title">Notion</div><div class="card-body">Write your case study like a document with images. Clean, fast to update. Easy to share a password-protected link for NDA work.</div><span class="tag gold" style="margin-top:4px;">notion.so</span></div>
+    <div class="card green"><div class="card-icon">⚡</div><div class="card-title">Framer / Webflow</div><div class="card-body">Build a real website with your portfolio. Impressive but takes more time. Great once you have 2–3 solid case studies ready.</div><span class="tag green" style="margin-top:4px;">framer.com / webflow.com</span></div>
+    <div class="card coral"><div class="card-icon">📂</div><div class="card-title">PDF Portfolio</div><div class="card-body">Always have a PDF version for email attachments and walk-in interviews. 8–12 pages, one project per 2 pages. Keep it under 5 MB.</div><span class="tag coral" style="margin-top:4px;">Backup option</span></div>
+  </div>
+</div>
+
+<!-- Slide 7: Common Mistakes -->
+<div class="slide" id="s6">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Watch Out</div>
+  <div class="slide-title">Common Portfolio <span class="hl-coral">Mistakes</span></div>
+  <div class="steps-col">
+    <div class="step-row" style="border-left:3px solid var(--coral);"><div class="step-info"><h4>Too many projects</h4><p>3 great case studies beats 10 shallow ones. Quality over quantity, always. Recruiters stop reading after the 3rd one.</p></div></div>
+    <div class="step-row" style="border-left:3px solid var(--coral);"><div class="step-info"><h4>Only final screens, no process</h4><p>The most common mistake. Show your research, sketches, wireframes, and iterations. That's your thinking made visible.</p></div></div>
+    <div class="step-row" style="border-left:3px solid var(--coral);"><div class="step-info"><h4>Copying popular apps without a brief</h4><p>"I redesigned Zomato" is only impressive if you explain the problem you were solving and why your solution is better.</p></div></div>
+    <div class="step-row" style="border-left:3px solid var(--coral);"><div class="step-info"><h4>No contact information visible</h4><p>Your email, LinkedIn, and phone should be on your home page and easy to find. Don't make them search for it.</p></div></div>
+    <div class="step-row" style="border-left:3px solid var(--coral);"><div class="step-info"><h4>Broken links or empty pages</h4><p>Test your portfolio on mobile before sending it. A broken link or unresponsive page loses you the interview on the spot.</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 8: Activity -->
+<div class="slide" id="s7">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Hands-On</div>
+  <div class="slide-title">Activity — <span class="hl-gold">Write Your Case Study</span></div>
+  <div style="background:var(--gld-dim);border:1px solid var(--gold);border-radius:14px;padding:24px 28px;margin-bottom:18px;">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">Your Task (20 min)</div>
+    <ol style="padding-left:18px;display:flex;flex-direction:column;gap:8px;">
+      <li style="color:var(--dim);font-size:.88rem;line-height:1.5;">Pick one project from this course (your persona, wireframe, or prototype).</li>
+      <li style="color:var(--dim);font-size:.88rem;line-height:1.5;">Write a 6-section case study outline using the framework from today's slides.</li>
+      <li style="color:var(--dim);font-size:.88rem;line-height:1.5;">Write the "Problem" and "My Role" sections in full sentences — not bullet points.</li>
+      <li style="color:var(--dim);font-size:.88rem;line-height:1.5;">Bonus: Create a Behance account and start a new project page for this case study.</li>
+    </ol>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <span class="tag gold">20 min activity</span><span class="tag vlt">10 min share</span><span class="tag coral">10 min Q&A</span>
+  </div>
+</div>
+
+<!-- Slide 9: Key Takeaway -->
+<div class="slide" id="s8">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Key Takeaway</div>
+  <div class="slide-title">Your Work <span class="hl">Needs a Voice</span></div>
+  <div style="background:var(--vlt-dim);border-left:4px solid var(--vlt);border-radius:0 14px 14px 0;padding:24px 28px;margin:16px 0;max-width:680px;">
+    <div style="font-size:3rem;color:var(--vlt);line-height:1;margin-bottom:8px;">"</div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;line-height:1.5;">A portfolio is not a gallery. It's a conversation you're having with a recruiter you haven't met yet. Make sure that conversation answers their most important question: can you think through a problem and come out the other side with something better?</div>
+    <div style="color:var(--dim);font-size:.82rem;margin-top:8px;">— Designer_Kid</div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+    <span class="tag vlt">Process over pixels</span><span class="tag coral">Story first</span><span class="tag gold">3 great > 10 average</span>
+  </div>
+</div>
+
+<!-- Slide 10: Up Next + Contact -->
+<div class="slide" id="s9">
+  <div class="wm">DESIGNER_KID</div>
+  <div class="eyebrow">Session Complete</div>
+  <div class="slide-title">One More <span class="hl">Session!</span></div>
+  <div class="slide-sub">Your portfolio story is taking shape. Tomorrow we wrap up the full course with final presentations and career paths.</div>
+  <a href="session_20.html" class="next-card">
+    <div><div class="nc-label">Up Next — Session 20</div><div class="nc-title">Final Presentations & Career Paths</div></div>
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+  <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+    <span class="tag vlt">Portfolio</span><span class="tag coral">Case studies</span><span class="tag gold">Behance</span>
+  </div>
+  <div class="contact-row">
+    <a class="clink" href="https://wa.me/919686959787" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--green)"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp
+    </a>
+    <a class="clink" href="http://linkedin.com/in/harikrishnam-raju/" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--vlt)"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      LinkedIn
+    </a>
+    <a class="clink" href="https://www.behance.net/rajuvegeshana" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--coral)"><path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029H23.7zm-7.249-3h3.999c-.066-1.741-1.242-2.329-1.973-2.329-.833 0-1.877.603-2.026 2.329zM8 12c2.282 0 4.227-1.037 4.227-3.866C12.227 5.247 10.3 4 8 4H0v16h8.757c2.528 0 4.985-1.373 4.985-4.276C13.742 12.76 11.154 12 8 12zm-3.5-5.5H7.5c1.062 0 1.5.938 1.5 1.5S8.562 9.5 7.5 9.5H4.5v-3zm3.5 9H4.5V15h3.5c1.09 0 1.75.75 1.75 1.75S9.09 18 8 18z"/></svg>
+      Behance
+    </a>
+  </div>
+</div>
+
+</div>
+<nav class="nav">
+  <button id="prev">← Prev</button>
+  <div class="dots" id="dots"></div>
+  <button id="next">Next →</button>
+</nav>
+<script>
+const slides=document.querySelectorAll('.slide'),dotsEl=document.getElementById('dots'),bar=document.getElementById('bar');
+let current=0;const total=slides.length;
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' on':'');d.addEventListener('click',()=>goTo(i));dotsEl.appendChild(d);});
+function updateUI(){bar.style.width=((current+1)/total*100)+'%';document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===current));}
+function goTo(n){if(n<0||n>=total)return;slides[current].classList.remove('active');slides[current].classList.add('exit');setTimeout(()=>slides[current].classList.remove('exit'),450);current=n;slides[current].classList.add('active');updateUI();}
+document.getElementById('prev').addEventListener('click',()=>goTo(current-1));
+document.getElementById('next').addEventListener('click',()=>goTo(current+1));
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')goTo(current+1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')goTo(current-1);});
+updateUI();
+
+  // PDF download button
+  (function(){
+    var btn = document.createElement('button');
+    btn.id = 'pdf-btn';
+    btn.textContent = '⬇ Save PDF';
+    btn.setAttribute('title', 'Print / Save as PDF');
+    btn.style.cssText = 'position:fixed;bottom:18px;right:18px;z-index:9999;padding:8px 16px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    btn.addEventListener('click', function(){ window.print(); });
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
+    // fallback if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') document.body.appendChild(btn);
+  })();
+</script>
+</body>
+</html>

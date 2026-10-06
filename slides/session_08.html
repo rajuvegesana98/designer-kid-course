@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 08 — Prototyping Basics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0F0E17; --surface: #1E1B32; --surf2: #252240;
+  --violet: #5B21B6; --vlt: #7C3AED; --vlt-dim: rgba(124,58,237,0.18);
+  --coral: #F4574A; --cor-dim: rgba(244,87,74,0.14);
+  --gold: #F5C518; --gld-dim: rgba(245,197,24,0.13);
+  --green: #34D399; --grn-dim: rgba(52,211,153,0.10);
+  --white: #F0EDF8; --dim: rgba(240,237,248,0.48);
+  --dim2: rgba(240,237,248,0.22); --border: rgba(240,237,248,0.08);
+  --r: 12px; --r2: 8px; font-family: 'DM Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--white); font-family: 'DM Sans', system-ui, sans-serif; overflow: hidden; }
+.deck { width: 100%; height: 100%; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 28px; border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 12px; background: var(--bg); }
+.tb-logo { display: flex; align-items: center; gap: 8px; }
+.tb-icon { width: 26px; height: 26px; background: var(--violet); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.tb-wordmark { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: -0.02em; color: var(--white); }
+.tb-wordmark span { color: var(--vlt); }
+.tb-info { font-size: 11px; font-weight: 500; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; text-align: center; flex: 1; }
+.tb-count { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.tb-count strong { color: var(--white); }
+.stage { flex: 1; position: relative; overflow: hidden; }
+.slide { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transform: translateX(32px); transition: opacity 0.28s ease, transform 0.28s ease; pointer-events: none; will-change: opacity, transform; }
+.slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+.slide.exit { opacity: 0; transform: translateX(-32px); }
+.abar { height: 3px; flex-shrink: 0; background: linear-gradient(90deg, var(--vlt), var(--coral)); }
+.wm { position: absolute; bottom: 14px; left: 24px; display: flex; align-items: center; gap: 6px; opacity: 0.25; pointer-events: none; z-index: 2; }
+.wm-icon { width: 18px; height: 18px; background: var(--violet); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.wm-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: -0.02em; color: var(--white); }
+.wm-text span { color: var(--vlt); }
+.sbody { flex: 1; padding: 34px 52px 36px; display: flex; flex-direction: column; overflow: hidden; }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--vlt); margin-bottom: 12px; font-family: 'Syne', sans-serif; }
+.stitle { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(24px,3.5vw,42px); line-height: 1.08; letter-spacing: -0.03em; color: var(--white); text-wrap: balance; margin-bottom: 12px; }
+.stitle .v { color: var(--vlt); } .stitle .c { color: var(--coral); } .stitle .g { color: var(--gold); }
+.ssub { font-size: 15px; font-weight: 400; color: var(--dim); line-height: 1.6; max-width: 580px; text-wrap: balance; margin-bottom: 20px; }
+.cover-body { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
+.glow1 { position: absolute; top: -80px; right: -100px; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(circle, rgba(91,33,182,0.28) 0%, transparent 68%); pointer-events: none; }
+.glow2 { position: absolute; bottom: 40px; right: 120px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(244,87,74,0.16) 0%, transparent 70%); pointer-events: none; }
+.cover-week { font-size: 10px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.cover-h { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(32px,5vw,60px); line-height: 1.04; letter-spacing: -0.04em; color: var(--white); text-wrap: balance; margin-bottom: 16px; }
+.cover-h span { color: var(--vlt); }
+.cover-desc { font-size: clamp(13px,1.4vw,15px); font-weight: 300; color: var(--dim); max-width: 500px; line-height: 1.65; margin-bottom: 28px; }
+.cover-pills { display: flex; flex-wrap: wrap; gap: 10px; }
+.pill { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--dim); }
+.pdot { width: 6px; height: 6px; border-radius: 50%; }
+.session-meta { margin-top: 18px; font-size: 12px; font-weight: 300; color: var(--dim); border-top: 1px solid var(--border); padding-top: 14px; }
+.nlist { display: flex; flex-direction: column; gap: 12px; }
+.ni { display: flex; gap: 14px; align-items: flex-start; }
+.ni-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; color: var(--vlt); background: var(--vlt-dim); width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.ni-text { font-size: clamp(13px,1.4vw,15px); font-weight: 400; color: var(--white); line-height: 1.5; }
+.ni-text small { display: block; font-weight: 300; font-size: 12px; color: var(--dim); margin-top: 2px; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 7px; }
+.card.vl { border-left: 3px solid var(--vlt); } .card.co { border-left: 3px solid var(--coral); }
+.card.go { border-left: 3px solid var(--gold); } .card.gr { border-left: 3px solid var(--green); }
+.card-icon { font-size: 22px; line-height: 1; margin-bottom: 2px; }
+.card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: clamp(12px,1.2vw,14px); color: var(--white); }
+.card-body { font-size: clamp(11px,1.1vw,13px); font-weight: 300; color: var(--dim); line-height: 1.55; }
+.analogy { padding: 13px 16px; border-radius: 8px; background: rgba(245,197,24,0.07); border: 1px solid rgba(245,197,24,0.18); font-size: clamp(12px,1.2vw,13px); color: var(--dim); line-height: 1.6; margin-top: 12px; }
+.analogy strong { color: var(--white); }
+.analogy.vlt { background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.2); }
+/* FIDELITY COMPARE */
+.fid-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; }
+.fid-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; display: flex; flex-direction: column; gap: 10px; }
+.fid-card.lofi { border-top: 3px solid var(--green); }
+.fid-card.hifi { border-top: 3px solid var(--vlt); }
+.fid-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
+.fid-label.lofi { color: var(--green); }
+.fid-label.hifi { color: var(--vlt); }
+.fid-desc { font-size: 13px; font-weight: 300; color: var(--dim); line-height: 1.6; }
+.fid-cons { font-size: 12px; font-weight: 300; color: var(--dim); padding-top: 8px; border-top: 1px solid var(--border); }
+.fid-cons strong { color: var(--coral); }
+.fid-rule { margin-top: 12px; padding: 11px 16px; border-radius: 8px; background: var(--surf2); border: 1px solid var(--border); font-size: 13px; font-weight: 500; color: var(--white); text-align: center; }
+/* FIGMA PIPELINE */
+.pipeline { display: flex; align-items: center; gap: 0; margin: 16px 0; }
+.pipe-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 500; color: var(--white); white-space: nowrap; }
+.pipe-arrow { display: flex; align-items: center; gap: 4px; padding: 0 8px; }
+.pipe-arrow-line { height: 1px; width: 24px; background: var(--dim2); }
+.pipe-label { font-size: 10px; font-weight: 500; color: var(--dim); white-space: nowrap; text-align: center; }
+.pipe-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.figma-terms { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; }
+.ft-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; }
+.ft-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
+.ft-desc { font-size: 12px; font-weight: 300; color: var(--dim); line-height: 1.5; }
+/* USER FLOW */
+.flow-diagram { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin: 14px 0; }
+.flow-node { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--white); white-space: nowrap; }
+.flow-node.start { border-color: var(--green); color: var(--green); }
+.flow-node.end { border-color: var(--vlt); color: var(--vlt); }
+.flow-sep { font-size: 16px; color: var(--dim2); padding: 0 6px; }
+.flow-tip { padding: 10px 14px; border-radius: 8px; background: var(--vlt-dim); border: 1px solid rgba(124,58,237,0.2); font-size: 12px; color: var(--dim); line-height: 1.5; margin-top: 8px; }
+.flow-tip strong { color: var(--vlt); }
+.flow-note { margin-top: 8px; font-size: 12px; font-weight: 300; color: var(--dim); line-height: 1.5; }
+.flow-note strong { color: var(--gold); }
+/* DOS DONTS */
+.dd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; }
+.dd-card { border-radius: 10px; background: var(--surface); border: 1px solid var(--border); padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+.dd-card.do { border-top: 3px solid var(--green); }
+.dd-card.dont { border-top: 3px solid var(--coral); }
+.dd-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+.dd-label.do { color: var(--green); }
+.dd-label.dont { color: var(--coral); }
+.dd-list { display: flex; flex-direction: column; gap: 8px; }
+.dd-item { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; font-weight: 300; color: var(--dim); line-height: 1.5; }
+.dd-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.dd-dot.do { background: var(--green); }
+.dd-dot.dont { background: var(--coral); }
+/* WALKTHROUGH */
+.walk { display: grid; grid-template-columns: auto 1fr; gap: 0; flex: 1; margin-top: 8px; }
+.walk-steps { display: flex; flex-direction: column; gap: 0; border-right: 1px solid var(--border); padding-right: 20px; min-width: 160px; }
+.walk-step { padding: 12px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.15s; }
+.walk-step:hover { background: var(--surf2); }
+.walk-step.active { background: var(--vlt-dim); }
+.ws-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; color: var(--dim); width: 20px; flex-shrink: 0; }
+.walk-step.active .ws-num { color: var(--vlt); }
+.ws-label { font-size: 12px; font-weight: 500; color: var(--dim); }
+.walk-step.active .ws-label { color: var(--white); }
+.walk-content { padding-left: 24px; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.wc-panel { display: none; flex-direction: column; gap: 10px; }
+.wc-panel.active { display: flex; }
+.wc-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+.wc-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: clamp(16px,1.8vw,20px); color: var(--white); }
+.wc-body { font-size: 13px; font-weight: 300; color: var(--dim); line-height: 1.65; max-width: 440px; }
+.wc-insight { padding: 10px 14px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); font-size: 12px; color: var(--dim); line-height: 1.5; max-width: 440px; }
+.wc-insight strong { color: var(--green); }
+/* QUOTE */
+.quote-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.qmark { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 72px; line-height: 0.8; color: var(--vlt); opacity: 0.4; }
+.qtext { font-family: 'Syne', sans-serif; font-weight: 700; font-size: clamp(20px,3vw,34px); line-height: 1.3; color: var(--white); text-wrap: balance; max-width: 620px; }
+.qattr { font-size: 13px; color: var(--dim); font-weight: 300; }
+.qtags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 18px; }
+.qtag { padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 400; color: var(--white); }
+/* ACTIVITY */
+.act-box { background: linear-gradient(135deg, rgba(245,197,24,0.06) 0%, rgba(91,33,182,0.09) 100%); border: 1px solid rgba(245,197,24,0.22); border-radius: 14px; padding: 22px 26px; display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+.act-label { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
+.act-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; color: var(--white); }
+.act-steps { display: flex; flex-direction: column; gap: 8px; }
+.act-step { display: flex; gap: 12px; align-items: flex-start; }
+.snum { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; color: var(--gold); background: var(--gld-dim); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.stext { font-size: clamp(12px,1.2vw,14px); font-weight: 300; color: var(--dim); line-height: 1.5; }
+.act-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.atag { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 500; color: var(--white); background: var(--surf2); border: 1px solid var(--border); }
+/* UP NEXT */
+.next-card { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 16px; background: linear-gradient(135deg, rgba(91,33,182,0.2) 0%, rgba(124,58,237,0.1) 100%); border: 1px solid rgba(124,58,237,0.35); border-radius: 14px; padding: 22px 28px; text-decoration: none; transition: background 0.2s, border-color 0.2s; }
+.next-card:hover { background: linear-gradient(135deg, rgba(91,33,182,0.32) 0%, rgba(124,58,237,0.18) 100%); border-color: var(--vlt); }
+.nc-left { display: flex; flex-direction: column; gap: 5px; }
+.nc-label { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
+.nc-session { font-size: 12px; color: var(--dim); }
+.nc-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: clamp(15px,1.8vw,20px); color: var(--white); }
+.nc-desc { font-size: 13px; font-weight: 300; color: var(--dim); line-height: 1.5; max-width: 500px; }
+.nc-arrow { color: var(--vlt); flex-shrink: 0; }
+/* CONTACT */
+.contact-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.contact-link { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; text-decoration: none; border: 1px solid var(--border); background: var(--surface); transition: background 0.15s, border-color 0.15s; }
+.contact-link:hover { background: var(--surf2); border-color: var(--vlt); }
+.cl-text { display: flex; flex-direction: column; }
+.cl-label { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+.cl-value { font-size: 13px; font-weight: 500; color: var(--white); }
+/* BOTTOM NAV */
+.botnav { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 12px 24px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.nbtn { display: flex; align-items: center; gap: 5px; padding: 7px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.nbtn:hover:not(:disabled) { background: var(--vlt-dim); border-color: var(--vlt); }
+.nbtn:disabled { opacity: 0.3; cursor: not-allowed; }
+.prog { flex: 1; max-width: 260px; height: 3px; background: var(--border); border-radius: 100px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--vlt), var(--coral)); border-radius: 100px; transition: width 0.28s ease; }
+.dots { display: flex; gap: 5px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); cursor: pointer; transition: background 0.2s, transform 0.2s; }
+.dot.on { background: var(--vlt); transform: scale(1.4); }
+@media (max-width: 640px) {
+  .sbody { padding: 18px 16px 14px; }
+  .g2, .fid-grid, .dd-grid, .figma-terms { grid-template-columns: 1fr; overflow-y: auto; }
+  .walk { grid-template-columns: 1fr; }
+  .walk-steps { flex-direction: row; flex-wrap: wrap; border-right: none; padding-right: 0; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+  .tb-info { display: none; }
+  .pipeline { flex-wrap: wrap; }
+  .flow-diagram { gap: 4px; }
+}
+
+  #pdf-btn { display: none !important; }
+}
+
+/* ── Shared session nav bar ── */
+.sn-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e0d9f5;
+  font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 2px 8px rgba(91,33,182,0.07);
+  min-height: 48px;
+}
+.sn-bar a, .sn-bar button {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 7px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.sn-back { background: #f0eef9; color: #5B21B6; }
+.sn-back:hover { background: #e0d9f5; }
+.sn-prev, .sn-next { background: #f0eef9; color: #5B21B6; }
+.sn-prev:hover, .sn-next:hover { background: #e0d9f5; }
+.sn-prev[disabled], .sn-next[disabled] { opacity: .35; pointer-events: none; }
+.sn-title { flex: 1; font-size: .88rem; font-weight: 600; color: #1a1830; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sn-download { background: #5B21B6; color: #fff; }
+.sn-download:hover { background: #7C3AED; }
+.sn-theme { background: #f0eef9; color: #5B21B6; font-size: 1rem; padding: 5px 10px; }
+.sn-theme:hover { background: #e0d9f5; }
+/* push deck content below nav bar */
+body > .deck, body > div.deck { padding-top: 48px; }
+/* light theme override */
+[data-theme="light"] .sn-bar { background: #fff; border-color: #e0d9f5; }
+[data-theme="dark"]  .sn-bar { background: #1A1830; border-color: #2E2A4A; }
+[data-theme="dark"]  .sn-title { color: #EDECF4; }
+[data-theme="dark"]  .sn-back, [data-theme="dark"] .sn-prev, [data-theme="dark"] .sn-next, [data-theme="dark"] .sn-theme { background: #2E2A4A; color: #a78bfa; }
+
+/* ── Light theme tokens ── */
+[data-theme="light"] {
+  --bg: #FAFAF8 !important;
+  --bg2: #F0EEF9 !important;
+  --surface: #fff !important;
+  --surf2: #F0EEF9 !important;
+  --white: #0F0E17 !important;
+  --dim: rgba(15,14,23,0.55) !important;
+  --dim2: rgba(15,14,23,0.35) !important;
+  --border: rgba(91,33,182,0.12) !important;
+}
+[data-theme="light"] html, [data-theme="light"] body,
+html[data-theme="light"], body[data-theme="light"] {
+  background: #FAFAF8 !important;
+  color: #0F0E17 !important;
+}
+[data-theme="light"] .slide,
+[data-theme="light"] .slide * { color: inherit; }
+
+/* ── Print CSS (clean PDF) ── */
+@media print {
+  .sn-bar { display: none !important; }
+  body { padding-top: 0 !important; }
+  body > .deck { padding-top: 0 !important; }
+  .botnav, #nav, .nav-row, [id="prev"], [id="next"], #dots, .dot, .prog, .topbar, .tb-count { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; overflow: visible !important; height: auto !important; }
+  .slide { display: none !important; page-break-after: always; break-after: page; position: relative !important; height: 100vh !important; opacity: 1 !important; transform: none !important; }
+  .slide.active { display: flex !important; background: #fff !important; }
+  .stage { overflow: visible !important; height: auto !important; }
+  .deck { height: auto !important; overflow: visible !important; padding-top: 0 !important; }
+}
+</style>
+
+<template id="wm-tpl">
+  <div class="wm">
+    <div class="wm-icon">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="3" width="8" height="8" rx="2" fill="#F0EDF8"/>
+        <rect x="13" y="3" width="8" height="8" rx="2" fill="#F4574A" opacity="0.85"/>
+        <rect x="3" y="13" width="8" height="8" rx="2" fill="#F5C518" opacity="0.85"/>
+        <rect x="13" y="13" width="8" height="8" rx="2" fill="#F0EDF8" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="wm-text">Designer<span>_Kid</span></div>
+  </div>
+</template>
+
+<div class="deck">
+  <div class="topbar">
+    <div class="tb-logo">
+      <div class="tb-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="8" height="8" rx="2" fill="#F0EDF8"/>
+          <rect x="13" y="3" width="8" height="8" rx="2" fill="#F4574A" opacity="0.85"/>
+          <rect x="3" y="13" width="8" height="8" rx="2" fill="#F5C518" opacity="0.85"/>
+          <rect x="13" y="13" width="8" height="8" rx="2" fill="#F0EDF8" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="tb-wordmark">Designer<span>_Kid</span></div>
+    </div>
+    <div class="tb-info">Session 08 &nbsp;·&nbsp; Week 2 &nbsp;·&nbsp; Prototyping Basics</div>
+    <div class="tb-count"><strong id="cur">1</strong> / 10</div>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <!-- S1 COVER -->
+    <div class="slide active" data-i="0">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="cover-body">
+          <div class="glow1"></div><div class="glow2"></div>
+          <div class="cover-week">Week 2 · Session 08</div>
+          <div class="cover-h">Prototyping<br><span>Basics</span></div>
+          <div class="cover-desc">Turn your static designs into clickable experiences — before a single line of code is written.</div>
+          <div class="cover-pills">
+            <div class="pill"><div class="pdot" style="background:var(--vlt)"></div>Figma</div>
+            <div class="pill"><div class="pdot" style="background:var(--coral)"></div>User Flows</div>
+            <div class="pill"><div class="pdot" style="background:var(--gold)"></div>Testing</div>
+          </div>
+          <div class="session-meta">1 hr &nbsp;·&nbsp; 20 min activity &nbsp;·&nbsp; 10 min share</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S2 AGENDA -->
+    <div class="slide" data-i="1">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="eyebrow">Today's Session</div>
+        <div class="stitle">What we'll cover <span class="v">today</span></div>
+        <div class="ssub">Six topics, one hands-on activity, and a live clickable flow you'll build yourself.</div>
+        <div class="nlist">
+          <div class="ni"><div class="ni-num">01</div><div class="ni-text">What is a Prototype</div></div>
+          <div class="ni"><div class="ni-num">02</div><div class="ni-text">Low-fi vs High-fi Prototypes</div></div>
+          <div class="ni"><div class="ni-num">03</div><div class="ni-text">Prototyping in Figma</div></div>
+          <div class="ni"><div class="ni-num">04</div><div class="ni-text">User Flows &amp; Screen Linking</div></div>
+          <div class="ni"><div class="ni-num">05</div><div class="ni-text">When to Prototype</div></div>
+          <div class="ni"><div class="ni-num">06</div><div class="ni-text">Activity: 3-Screen Prototype</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3 WHAT IS A PROTOTYPE -->
+    <div class="slide" data-i="2">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="eyebrow">The Concept</div>
+        <div class="stitle">A prototype is a <span class="v">testable version</span> of your design — before any code is written</div>
+        <div class="analogy">
+          <strong>Architect analogy:</strong> An architect builds a scale model before breaking ground. You prototype before your dev team writes a single line.
+        </div>
+        <div class="g3" style="flex:1;margin-top:16px;">
+          <div class="card vl">
+            <div class="card-icon">🧪</div>
+            <div class="card-title">Test Ideas</div>
+            <div class="card-body">Validate your concept with real users before committing time and budget to development.</div>
+          </div>
+          <div class="card go">
+            <div class="card-icon">💸</div>
+            <div class="card-title">Save Time</div>
+            <div class="card-body">Catching a broken flow in a prototype costs minutes. Catching it in code costs days.</div>
+          </div>
+          <div class="card gr">
+            <div class="card-icon">💬</div>
+            <div class="card-title">Get Feedback</div>
+            <div class="card-body">Show, don't tell. A clickable prototype gets far more useful feedback than a static screenshot.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S4 LOW-FI VS HIGH-FI -->
+    <div class="slide" data-i="3">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="eyebrow">Fidelity</div>
+        <div class="stitle">Choose your fidelity based on <span class="c">your goal</span></div>
+        <div class="fid-grid" style="flex:1;">
+          <div class="fid-card lofi">
+            <div class="fid-label lofi">Low-fi</div>
+            <div class="fid-desc">Paper sketches or simple digital wireframes. Fast, cheap, and great for early feedback when the concept is still evolving.</div>
+            <div class="fid-cons"><strong>Watch out:</strong> Hard for users to imagine the final feel.</div>
+          </div>
+          <div class="fid-card hifi">
+            <div class="fid-label hifi">High-fi</div>
+            <div class="fid-desc">Near-final UI with real colours, fonts, and images. Perfect for user testing when you're validating a specific design direction.</div>
+            <div class="fid-cons"><strong>Watch out:</strong> Takes longer to build — don't invest too early.</div>
+          </div>
+        </div>
+        <div class="fid-rule">Low-fi = validate structure &nbsp;·&nbsp; High-fi = validate feel</div>
+      </div>
+    </div>
+
+    <!-- S5 FIGMA PROTOTYPING OVERVIEW -->
+    <div class="slide" data-i="4">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="eyebrow">Tool: Figma</div>
+        <div class="stitle">Figma lets you link screens with <span class="v">interactions</span> — no code needed</div>
+        <div class="pipeline">
+          <div class="pipe-col">
+            <div class="pipe-frame">Frame 1 · Splash</div>
+          </div>
+          <div class="pipe-col">
+            <div class="pipe-label">Click CTA</div>
+            <div class="pipe-arrow"><div class="pipe-arrow-line"></div><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 4h6M4 1l3 3-3 3" stroke="rgba(240,237,248,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="pipe-col">
+            <div class="pipe-frame">Frame 2 · Login</div>
+          </div>
+          <div class="pipe-col">
+            <div class="pipe-label">Submit</div>
+            <div class="pipe-arrow"><div class="pipe-arrow-line"></div><svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 4h6M4 1l3 3-3 3" stroke="rgba(240,237,248,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="pipe-col">
+            <div class="pipe-frame">Frame 3 · Home</div>
+          </div>
+        </div>
+        <div class="figma-terms" style="flex:1;">
+          <div class="ft-card" style="border-left:3px solid var(--vlt);">
+            <div class="ft-name" style="color:var(--vlt);">Frame</div>
+            <div class="ft-desc">A screen or page in Figma — the building block of any prototype.</div>
+          </div>
+          <div class="ft-card" style="border-left:3px solid var(--gold);">
+            <div class="ft-name" style="color:var(--gold);">Connection</div>
+            <div class="ft-desc">The arrow you draw between frames — tells Figma where to go next.</div>
+          </div>
+          <div class="ft-card" style="border-left:3px solid var(--green);">
+            <div class="ft-name" style="color:var(--green);">Trigger</div>
+            <div class="ft-desc">What starts the interaction — a tap, hover, or drag from the user.</div>
+          </div>
+          <div class="ft-card" style="border-left:3px solid var(--coral);">
+            <div class="ft-name" style="color:var(--coral);">Transition</div>
+            <div class="ft-desc">How the screen moves — slide, fade, push. Controls the feel of the flow.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S6 USER FLOWS -->
+    <div class="slide" data-i="5">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="eyebrow">Flow Thinking</div>
+        <div class="stitle">A user flow is the path a user takes to <span class="v">complete one goal</span></div>
+        <div class="flow-diagram">
+          <div class="flow-node start">Start: Open App</div>
+          <div class="flow-sep">→</div>
+          <div class="flow-node">See Home</div>
+          <div class="flow-sep">→</div>
+          <div class="flow-node">Tap Product</div>
+          <div class="flow-sep">→</div>
+          <div class="flow-node">View Detail</div>
+          <div class="flow-sep">→</div>
+          <div class="flow-node">Add to Cart</div>
+          <div class="flow-sep">→</div>
+          <div class="flow-node">Checkout</div>
+          <div class="flow-sep">→</div>
+          <div class="flow-node end">Done</div>
+        </div>
+        <div class="flow-tip"><strong>Tip:</strong> Map the happy path first, then design for edge cases.</div>
+        <div class="flow-note" style="margin-top:12px;"><strong>Remember:</strong> Each node in your flow = one screen you need to design. Count your nodes before you open Figma.</div>
+        <div class="analogy vlt" style="margin-top:12px;">
+          <strong>Happy path first:</strong> Design the ideal scenario from start to finish. Only after it works perfectly do you start adding error states and edge cases.
+        </div>
+      </div>
+    </div>
+
+    <!-- S7 DO'S AND DON'TS -->
+    <div class="slide" data-i="6">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="eyebrow">Best Practices</div>
+        <div class="stitle">Prototype <span class="g">Do's</span> and <span class="c">Don'ts</span></div>
+        <div class="ssub">Simple rules that separate productive prototyping from wasted effort.</div>
+        <div class="dd-grid" style="flex:1;">
+          <div class="dd-card do">
+            <div class="dd-label do">DO</div>
+            <div class="dd-list">
+              <div class="dd-item"><div class="dd-dot do"></div>Test with real users — not just classmates or teammates</div>
+              <div class="dd-item"><div class="dd-dot do"></div>Link all key screens so the flow feels complete</div>
+              <div class="dd-item"><div class="dd-dot do"></div>Use realistic content — real labels, real data</div>
+              <div class="dd-item"><div class="dd-dot do"></div>Test on the actual device (mobile, tablet, desktop)</div>
+            </div>
+          </div>
+          <div class="dd-card dont">
+            <div class="dd-label dont">DON'T</div>
+            <div class="dd-list">
+              <div class="dd-item"><div class="dd-dot dont"></div>Over-design before you've tested the basic flow</div>
+              <div class="dd-item"><div class="dd-dot dont"></div>Skip edge cases — users will always find them</div>
+              <div class="dd-item"><div class="dd-dot dont"></div>Prototype every micro-interaction in early rounds</div>
+              <div class="dd-item"><div class="dd-dot dont"></div>Present your prototype without context — let users explore on their own first</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S8 INTERACTIVE WALKTHROUGH -->
+    <div class="slide" data-i="7">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="eyebrow">Hands-on</div>
+        <div class="stitle">3 steps to prototype <span class="v">in Figma</span></div>
+        <div class="walk">
+          <div class="walk-steps" id="walk-steps">
+            <div class="walk-step active" data-panel="0"><div class="ws-num">01</div><div class="ws-label">Create Frames</div></div>
+            <div class="walk-step" data-panel="1"><div class="ws-num">02</div><div class="ws-label">Connect Screens</div></div>
+            <div class="walk-step" data-panel="2"><div class="ws-num">03</div><div class="ws-label">Present &amp; Test</div></div>
+          </div>
+          <div class="walk-content">
+            <div class="wc-panel active" data-panel="0">
+              <div class="wc-tag">Step 01 — Create Frames</div>
+              <div class="wc-title">Build one frame for each screen</div>
+              <div class="wc-body">In Figma, press F and draw your first frame. Choose a device preset (iPhone 14, Android, Desktop). Repeat for every screen in your flow. Name them clearly: "Splash", "Login", "Home".</div>
+              <div class="wc-insight"><strong>Pro tip:</strong> Name your frames before linking — it makes the connection arrows readable at a glance.</div>
+            </div>
+            <div class="wc-panel" data-panel="1">
+              <div class="wc-tag">Step 02 — Connect with Prototype Arrows</div>
+              <div class="wc-title">Select element → Prototype tab → drag arrow to target</div>
+              <div class="wc-body">Click the element that should trigger the transition (e.g. a button). Switch to the Prototype tab in the right panel. A blue dot appears — drag it to the destination frame. Set the trigger (On Tap) and transition (Push, Fade, or Slide).</div>
+              <div class="wc-insight"><strong>Shortcut:</strong> Hold Cmd/Ctrl while dragging to snap to the centre of the target frame.</div>
+            </div>
+            <div class="wc-panel" data-panel="2">
+              <div class="wc-tag">Step 03 — Present &amp; Test</div>
+              <div class="wc-title">Click ▶ Present to run your flow</div>
+              <div class="wc-body">Hit the Play/Present button (top right). Figma opens a preview window that simulates your app. Click through your connections and check that every transition feels right. Share the link with users for remote testing.</div>
+              <div class="wc-insight"><strong>Share link:</strong> Prototype links let anyone test on their phone without installing anything.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S9 KEY TAKEAWAY -->
+    <div class="slide" data-i="8">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="eyebrow">Key Takeaway</div>
+        <div class="quote-wrap">
+          <div class="qmark">"</div>
+          <div class="qtext">Prototype to fail fast, fail cheap, and ship with <span style="color:var(--vlt)">confidence.</span></div>
+          <div class="qattr">The best time to discover a broken flow is in Figma — not in production.</div>
+          <div class="qtags">
+            <div class="qtag" style="background:var(--vlt-dim);border:1px solid rgba(124,58,237,0.2)">Test Early</div>
+            <div class="qtag" style="background:var(--cor-dim);border:1px solid rgba(244,87,74,0.2)">Real Content</div>
+            <div class="qtag" style="background:var(--gld-dim);border:1px solid rgba(245,197,24,0.15)">Happy Path First</div>
+            <div class="qtag" style="background:var(--grn-dim);border:1px solid rgba(52,211,153,0.15)">Figma Connections</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S10 ACTIVITY + UP NEXT + CONTACT -->
+    <div class="slide" data-i="9">
+      <div class="abar"></div>
+      <div class="sbody">
+        <div class="eyebrow">Hands-on Activity</div>
+        <div class="stitle">Build your first <span class="g">3-screen flow</span></div>
+        <div class="act-box">
+          <div class="act-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Activity (20 min)
+          </div>
+          <div class="act-title">In Figma, create 3 frames — Splash Screen, Login Screen, Home Screen. Link them with prototype connections. Present your clickable flow to the group.</div>
+          <div class="act-steps">
+            <div class="act-step"><div class="snum">1</div><div class="stext">Create 3 Frames — Splash, Login, Home</div></div>
+            <div class="act-step"><div class="snum">2</div><div class="stext">Add Placeholder Content to each frame</div></div>
+            <div class="act-step"><div class="snum">3</div><div class="stext">Link them with Prototype Arrows (On Tap)</div></div>
+            <div class="act-step"><div class="snum">4</div><div class="stext">Present your clickable flow to the group</div></div>
+          </div>
+          <div class="act-tags">
+            <div class="atag">Figma Required</div>
+            <div class="atag">3 Screens</div>
+            <div class="atag">Live Demo</div>
+          </div>
+        </div>
+        <a href="session_09.html" class="next-card" style="margin-top:14px;">
+          <div class="nc-left">
+            <div class="nc-label">Up Next</div>
+            <div class="nc-session">Session 09</div>
+            <div class="nc-title">Usability Testing</div>
+            <div class="nc-desc">Put your designs in front of real users and learn fast.</div>
+          </div>
+          <div class="nc-arrow">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </div>
+        </a>
+        <div class="contact-row">
+          <a class="contact-link" href="https://wa.me/919686959787" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="#25D366"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.977-1.404A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.952 7.952 0 01-4.075-1.124l-.293-.174-3.032.855.844-3.117-.19-.302A7.952 7.952 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" fill="#25D366"/></svg>
+            <div class="cl-text"><span class="cl-label">WhatsApp</span><span class="cl-value">+91 96869 59787</span></div>
+          </a>
+          <a class="contact-link" href="http://linkedin.com/in/harikrishnam-raju/" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#0A66C2"/><path d="M7 9H5v10h2V9zm-1-1.5A1.25 1.25 0 115.75 6 1.25 1.25 0 017 7.5zM19 19h-2v-4.5c0-1.1-.9-2-2-2s-2 .9-2 2V19h-2V9h2v1.1A3.48 3.48 0 0115 9c2.2 0 4 1.8 4 4v6z" fill="#fff"/></svg>
+            <div class="cl-text"><span class="cl-label">LinkedIn</span><span class="cl-value">harikrishnam-raju</span></div>
+          </a>
+          <a class="contact-link" href="https://www.behance.net/rajuvegeshana" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#1769FF"/><path d="M9.5 7H6v10h3.5c2 0 3.5-1 3.5-3 0-1.1-.5-2-1.5-2.5.8-.5 1.3-1.3 1.3-2.2C12.8 7.9 11.4 7 9.5 7zm-.3 4H8V9h1.2c.8 0 1.3.4 1.3 1s-.5 1-1.3 1zm.3 4H8v-2h1.5c.9 0 1.5.4 1.5 1s-.6 1-1.5 1zm8-7h-4v1.5h4V8zm-2 2.5c-1.9 0-3 1.2-3 3s1.1 3 3 3c1.3 0 2.3-.6 2.7-1.5h-1.5c-.2.3-.7.5-1.2.5-.8 0-1.3-.5-1.4-1.2H18c.1-2-1-3.8-2.5-3.8zm-1.4 2.5c.1-.7.6-1.2 1.4-1.2s1.2.5 1.3 1.2h-2.7z" fill="#fff"/></svg>
+            <div class="cl-text"><span class="cl-label">Behance</span><span class="cl-value">rajuvegeshana</span></div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end stage -->
+
+  <div class="botnav">
+    <button class="nbtn" id="prev" disabled>← Prev</button>
+    <div class="dots" id="dots"></div>
+    <div class="prog"><div class="prog-fill" id="pf" style="width:10%"></div></div>
+    <button class="nbtn" id="next">Next →</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  // inject watermarks
+  var tpl = document.getElementById('wm-tpl').content;
+  document.querySelectorAll('.slide').forEach(function(s){
+    s.style.position = 'relative';
+    s.appendChild(tpl.cloneNode(true));
+  });
+
+  // interactive walkthrough
+  var walkSteps = document.getElementById('walk-steps');
+  if (walkSteps) {
+    walkSteps.addEventListener('click', function(e){
+      var step = e.target.closest('.walk-step');
+      if (!step) return;
+      var idx = step.dataset.panel;
+      document.querySelectorAll('.walk-step').forEach(function(s){ s.classList.remove('active'); });
+      document.querySelectorAll('.wc-panel').forEach(function(p){ p.classList.remove('active'); });
+      step.classList.add('active');
+      var panel = document.querySelector('.wc-panel[data-panel="'+idx+'"]');
+      if (panel) panel.classList.add('active');
+    });
+  }
+
+  // slide navigation
+  var slides = document.querySelectorAll('.slide');
+  var n = slides.length, cur = 0;
+  var prevBtn = document.getElementById('prev');
+  var nextBtn = document.getElementById('next');
+  var curEl = document.getElementById('cur');
+  var pf = document.getElementById('pf');
+  var dotsEl = document.getElementById('dots');
+
+  for (var i = 0; i < n; i++) {
+    var d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    d.dataset.i = i;
+    (function(idx){ d.addEventListener('click', function(){ go(idx); }); })(i);
+    dotsEl.appendChild(d);
+  }
+
+  function go(to) {
+    slides[cur].classList.remove('active');
+    slides[cur].classList.add('exit');
+    var old = cur; cur = to;
+    slides[cur].classList.add('active');
+    var el = slides[old];
+    setTimeout(function(){ el.classList.remove('exit'); }, 300);
+    curEl.textContent = cur + 1;
+    pf.style.width = ((cur + 1) / n * 100) + '%';
+    prevBtn.disabled = cur === 0;
+    nextBtn.disabled = cur === n - 1;
+    document.querySelectorAll('.dot').forEach(function(d, i){ d.classList.toggle('on', i === cur); });
+  }
+
+  prevBtn.addEventListener('click', function(){ if (cur > 0) go(cur - 1); });
+  nextBtn.addEventListener('click', function(){ if (cur < n - 1) go(cur + 1); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { if (cur < n-1) go(cur+1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { if (cur > 0)   go(cur-1); }
+  });
+})();
+
+  // PDF download button
+  (function(){
+    var btn = document.createElement('button');
+    btn.id = 'pdf-btn';
+    btn.textContent = '⬇ Save PDF';
+    btn.setAttribute('title', 'Print / Save as PDF');
+    btn.style.cssText = 'position:fixed;bottom:18px;right:18px;z-index:9999;padding:8px 16px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+    btn.addEventListener('click', function(){ window.print(); });
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
+    // fallback if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') document.body.appendChild(btn);
+  })();
+</script>
+</body>
+</html>
